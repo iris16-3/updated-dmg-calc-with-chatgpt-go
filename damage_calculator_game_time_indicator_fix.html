@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Damage Calculator Game</title>
+<style>
+:root{--bg:#f5f6fa;--card:#fff;--ink:#202638;--muted:#727b8d;--line:#e5e8ef;--accent:#6658d3;--accent2:#eeeaff;--good:#16845b;--bad:#c34b56;--gold:#c18a22;--shadow:0 5px 20px #2026380b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:11px;padding:10px 14px;background:var(--accent);color:white;font-weight:650}button:disabled{opacity:.48;cursor:not-allowed;filter:grayscale(.25)}button.secondary{background:#eef0f5;color:#343b4c}button.danger{background:#fff0f0;color:#b52f40}button.small{padding:6px 10px;font-size:13px}.wrap{max-width:1100px;margin:auto;padding:16px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.brand{font-size:22px;font-weight:850;letter-spacing:-.6px}.brand span{color:var(--accent)}.sub{color:var(--muted);font-size:13px}.nav,.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.nav button,.tabs button{background:#e9eaf1;color:#4d5566}.nav button.active,.tabs button.active{background:var(--accent);color:white}.panel,.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}.panel{margin:12px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}.grid.tight{grid-template-columns:repeat(auto-fit,minmax(min(100%,165px),1fr))}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.between{display:flex;justify-content:space-between;align-items:center;gap:10px}.muted{color:var(--muted)}h1,h2,h3,p{margin:0 0 10px}h2{font-size:19px}h3{font-size:15px}.field{display:flex;flex-direction:column;gap:5px;margin:9px 0;min-width:0}.field label{font-size:12px;font-weight:700;color:#596174}.field input,.field select,.field textarea{width:100%;min-width:0;border:1px solid #dfe3ec;background:#fff;border-radius:10px;padding:10px;color:var(--ink)}input[type=checkbox]{width:auto;accent-color:var(--accent)}.checks{display:flex;gap:10px;flex-wrap:wrap}.check{display:flex;gap:5px;align-items:center;font-size:13px}.list{display:grid;gap:9px}.item{border:1px solid var(--line);border-radius:13px;padding:12px;background:#fff}.tag{display:inline-block;background:var(--accent2);color:#5143bd;border-radius:20px;padding:3px 8px;font-size:11px;margin:2px}.bar{height:9px;background:#edf0f4;border-radius:20px;overflow:hidden;margin:5px 0}.bar>i{display:block;height:100%;background:#28a879;border-radius:20px}.bar.stun>i{background:#d5a13d}.hidden{display:none!important}.stat{font-size:13px;color:#4d5669}.stat b{color:var(--ink)}.notice{background:#f4f1ff;color:#5143bd;padding:10px 12px;border-radius:11px;font-size:13px}.enemy-row,.party-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:9px}.enemy-card{position:relative;overflow:visible}.damage-float{position:absolute;z-index:5;left:50%;top:42%;transform:translate(-50%,0);pointer-events:none;white-space:nowrap;font-weight:900;font-size:22px;color:#202638;text-shadow:0 1px 0 #fff,0 2px 8px #fff;animation:damageFloat 2s ease-out forwards}.damage-float.critical{font-size:25px;color:#d43e4c}.damage-total-float{position:absolute;z-index:7;left:50%;top:10%;transform:translate(-50%,0);pointer-events:none;white-space:nowrap;font-weight:950;font-size:17px;color:#16845b;background:#effcf6;border:1px solid #9ddfc1;border-radius:10px;padding:5px 9px;box-shadow:0 3px 12px #20263822;animation:totalFloat 1.5s ease-out forwards}@keyframes totalFloat{0%{opacity:0;transform:translate(-50%,8px) scale(.9)}15%,75%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-18px) scale(.96)}}.damage-float .crit-word{display:block;font-size:11px;letter-spacing:1.5px;text-align:center;color:#d43e4c}@keyframes damageFloat{0%{opacity:0;transform:translate(-50%,10px) scale(.8)}8%{opacity:1;transform:translate(-50%,0) scale(1.08)}78%{opacity:1;transform:translate(-50%,-28px) scale(1)}100%{opacity:0;transform:translate(-50%,-42px) scale(.96)}}.skill-used-overlay{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;pointer-events:none;background:rgba(18,24,38,.16);animation:usedFade 1.5s ease forwards}.skill-used-card{background:#202638;color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:18px 30px;max-width:86vw;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.25)}.skill-used-label{font-size:12px;letter-spacing:3px;font-weight:900;color:#b8c7e8}.skill-used-name{font-size:clamp(22px,5vw,34px);font-weight:900;margin-top:5px;overflow-wrap:anywhere}.auto-skill-indicator{position:fixed;right:18px;top:18px;z-index:1250;pointer-events:none;background:#202638;color:#fff;border:1px solid #ffffff35;border-radius:999px;padding:8px 13px;box-shadow:0 6px 22px #0003;font-size:13px;font-weight:800;max-width:min(80vw,360px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:autoIndicatorIn .2s ease-out,autoIndicatorOut .25s ease-in 1.65s forwards}@keyframes autoIndicatorIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}@keyframes autoIndicatorOut{to{opacity:0;transform:translateY(-6px)}}@keyframes usedFade{0%,78%{opacity:1}100%{opacity:0}}.party-card{position:relative}.enemy-card,.party-card{min-width:0;border:1px solid var(--line);border-radius:13px;padding:11px;background:#fff}.enemy-card.dead{opacity:.55;background:#f1f2f5}.enemy-card.stunned{border-color:#d5a13d;background:#fffaf0}.modal{position:fixed;inset:0;background:#1a203080;display:flex;align-items:center;justify-content:center;padding:14px;z-index:10}.modalbox{background:white;border-radius:18px;padding:18px;width:min(560px,100%);max-height:88vh;overflow:auto;box-shadow:0 20px 60px #1114}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#202638;color:white;padding:10px 16px;border-radius:12px;z-index:20;max-width:90%;text-align:center}.skillbtn{width:100%;text-align:left;background:#f4f2ff;color:#4135a8;margin-top:7px}.skillbtn:disabled{opacity:.4}.meter{font-size:12px;color:var(--muted)}.buff-details{margin:9px 0;border-top:1px solid var(--line);padding-top:7px}.buff-details summary{cursor:pointer;font-size:12px;font-weight:750;color:#5143bd}.buff-tracker{display:grid;gap:6px;margin-top:7px}.buff-entry{background:#f8f7ff;border:1px solid #e9e5ff;border-radius:9px;padding:7px}.buff-time{font-size:11px;color:var(--muted)}.buff-delta{color:var(--good);font-size:11px;font-weight:700}.buff-meter{height:4px;background:#e7e8ef;border-radius:9px;margin-top:5px;overflow:hidden}.buff-meter i{display:block;height:100%;background:var(--accent)}.live-stat-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px 8px;margin:7px 0}.result{border-left:4px solid var(--accent)}.state-status{margin:7px 0;padding:6px 8px;background:#f5f3ff;border-radius:9px;display:grid;gap:3px}.state-status .sub{font-size:11px}footer{padding:24px 0;text-align:center;color:var(--muted);font-size:12px}
+@media(max-width:520px){.wrap{padding:10px}.panel,.card{padding:12px}.brand{font-size:19px}.top{align-items:flex-start}.nav button{flex:1}.between.mobile-stack{align-items:flex-start;flex-direction:column}.grid.tight{grid-template-columns:repeat(2,minmax(0,1fr))}.enemy-row,.party-row{grid-template-columns:repeat(2,minmax(0,1fr))}.enemy-card,.party-card{padding:9px;font-size:13px}}
+.enemy-dots{margin-top:7px;padding-top:6px;border-top:1px solid var(--line);display:grid;gap:4px}.enemy-dots>.sub{font-size:11px}.dot-entry{background:#fff7ed;border:1px solid #fed7aa;border-radius:7px;padding:4px 6px;font-size:11px}.dot-entry .sub{font-size:10px;line-height:1.25}.dot-count{font-size:10px;font-weight:800;color:#c2410c;background:#ffedd5;border-radius:20px;padding:2px 5px;white-space:nowrap}.relic-combat-list{display:grid;gap:6px;margin-top:7px}.relic-combat-entry{padding:7px 8px;border:1px solid #e7e4fa;background:#faf9ff;border-radius:9px;font-size:12px}.relic-combat-entry .sub{font-size:11px}
+/* Relic roll range side panel */
+#modalContent.relic-range-layout{width:min(900px,calc(100vw - 28px));max-height:88vh;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) minmax(245px,290px);gap:14px;align-items:start;}
+.relic-reward-main{min-width:0;max-height:78vh;overflow-y:auto;padding-right:3px}.relic-range-panel{min-width:0;border:1px solid var(--line);border-radius:14px;background:#fbfbff;padding:13px;max-height:78vh;overflow:auto;}
+.relic-range-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px}.relic-range-entry{padding:9px;border:1px solid var(--line);border-radius:10px;background:white;margin:7px 0;font-size:12px}.relic-range-entry .range-values{color:var(--muted);margin-top:3px}.relic-range-entry .range-score{font-weight:800;color:var(--good);margin-top:4px}.relic-help-btn{border-radius:50%;width:32px;height:32px;padding:0;font-weight:900;font-size:16px;flex:0 0 32px}
+@media(max-width:600px){#modalContent.relic-range-layout{grid-template-columns:minmax(0,1fr) minmax(130px,42%);gap:8px;padding:10px;width:calc(100vw - 20px)}.relic-reward-main{max-height:78vh}.relic-range-panel{padding:8px;max-height:78vh}.relic-range-entry{padding:6px;font-size:11px}.relic-range-head h3{font-size:13px}}
+</style>
+</head>
+<body><main class="wrap">
+<header class="top"><div><div class="brand">DAMAGE <span>CALCULATOR</span></div><div class="sub">Character builder · Combat simulator · Offline</div></div></header>
+<nav class="nav" id="mainnav"><button class="active" data-page="create">Create Mode</button><button data-page="battle">Combat Mode</button><button data-page="settings">Settings</button></nav>
+<section id="createPage">
+<div class="tabs"><button class="active" data-tab="characters">Characters</button><button data-tab="enemies">Enemies</button><button data-tab="relicEquip">Relic Equip</button><button data-tab="relicInventory">Relic Inventory</button></div>
+<div id="charactersTab">
+<div class="between"><div><h2>Characters</h2><div class="sub">Create and manage your playable characters.</div></div><button onclick="newCharacter()">+ Character</button></div>
+<div id="characterList" class="list" style="margin-top:12px"></div>
+</div>
+<div id="enemiesTab" class="hidden">
+<div class="between"><div><h2>Enemies</h2><div class="sub">Enemy templates are independent of characters.</div></div><button onclick="newEnemy()">+ Enemy</button></div>
+<div id="enemyList" class="list" style="margin-top:12px"></div>
+</div>
+<div id="relicEquipTab" class="hidden"><div id="relicEquipContent"></div></div>
+<div id="relicInventoryTab" class="hidden"><div id="relicInventoryContent"></div></div>
+</section>
+<section id="settingsPage" class="hidden">
+<div class="tabs"><button class="active" data-tab="tags">Skill Tags</button><button data-tab="factionTags">Faction Tags</button><button data-tab="elementTags">Element Tags</button><button data-tab="relicSettings">Relic Settings</button><button data-tab="others">Others</button></div>
+<div id="tagsTab"><h2>Skill Tags</h2><div class="row"><input id="newTag" placeholder="New skill tag" style="flex:1;min-width:0;padding:10px;border:1px solid var(--line);border-radius:10px"><button onclick="addTag()">Add tag</button></div><div id="tagList" style="margin-top:12px"></div></div>
+<div id="factionTagsTab" class="hidden"><h2>Faction Tags</h2><div class="row"><input id="newFactionTag" placeholder="New faction tag" style="flex:1;min-width:0;padding:10px;border:1px solid var(--line);border-radius:10px"><button onclick="addTaxonomyTag('factionTags','newFactionTag')">Add faction</button></div><div id="factionTagList" style="margin-top:12px"></div></div>
+<div id="elementTagsTab" class="hidden"><h2>Element Tags</h2><div class="row"><input id="newElementTag" placeholder="New element tag" style="flex:1;min-width:0;padding:10px;border:1px solid var(--line);border-radius:10px"><button onclick="addTaxonomyTag('elementTags','newElementTag')">Add element</button></div><div id="elementTagList" style="margin-top:12px"></div></div>
+<div id="relicSettingsTab" class="hidden"><div id="relicSettingsContent"></div></div>
+<div id="othersTab" class="hidden">
+ <h2>Others</h2>
+ <div class="panel">
+  <h3>Relic Essence</h3>
+  <div class="sub">Set your Relic Essence amount directly for testing relic generation.</div>
+  <div class="row" style="margin-top:10px;align-items:end">
+   <div class="field" style="flex:1;min-width:130px"><label>Essence Amount</label><input id="essenceAmountInput" type="number" min="0" step="1" value="${0}"></div>
+   <button onclick="setEssenceAmount()">Set Amount</button>
+  </div>
+  <div class="sub" id="essenceAmountCurrent" style="margin-top:6px"></div>
+ </div>
+ <div class="panel">
+  <h3>Discarded Essence</h3>
+  <div class="sub">Set your Discarded Essence amount directly for testing and other uses.</div>
+  <div class="row" style="margin-top:10px;align-items:end">
+   <div class="field" style="flex:1;min-width:130px"><label>Discarded Essence Amount</label><input id="discardedEssenceAmountInput" type="number" min="0" step="1" value="0"></div>
+   <button onclick="setDiscardedEssenceAmount()">Set Amount</button>
+  </div>
+  <div class="sub" id="discardedEssenceAmountCurrent" style="margin-top:6px"></div>
+ </div>
+ <div class="panel">
+  <h3>Quick Delete Relics</h3>
+  <div class="sub">Delete all relics that are both unequipped and unfavourited. Equipped and favourited relics will be kept.</div>
+  <button class="danger" style="margin-top:10px" onclick="confirmQuickDeleteRelics()">Delete All Eligible Relics</button>
+  <div class="sub" id="eligibleRelicsCurrent" style="margin-top:6px"></div>
+ </div>
+ <div class="panel">
+  <h3>Export Data</h3>
+  <div class="sub">Download a backup of your characters, enemies, relics, tags, and settings.</div>
+  <button style="margin-top:10px" onclick="exportData()">Export Data</button>
+ </div>
+</div>
+</section>
+<section id="battlePage" class="hidden">
+<div id="setup">
+<h2>Battle Setup</h2><p class="sub">Choose up to 3 characters and 5 enemy instances. Duplicate enemy IDs are allowed.</p>
+<div class="panel"><h3>Character slots</h3><div class="grid tight" id="charSlots"></div></div>
+<div class="panel"><h3>Enemy slots</h3><div class="grid tight" id="enemySlots"></div></div>
+<div class="field"><label>Battle time limit in seconds (optional)</label><input id="timeLimit" type="number" min="1" placeholder="Empty = unlimited"></div>
+<button onclick="startBattle()">Start Battle</button><div id="setupError" class="sub" style="color:var(--bad);margin-top:8px"></div>
+</div>
+<div id="combat" class="hidden">
+<div class="between mobile-stack"><div><h2>Combat</h2><div class="sub" id="clockLabel">Combat time: 0.00s</div></div><div class="row"><strong id="timerLabel">∞ Unlimited</strong><button id="finishBattleBtn" class="hidden small" onclick="finishBattle(battle?.finishReason||'Battle complete.')">Finish and Show Results</button><button class="danger small" onclick="endConfirm()">End Session</button></div></div>
+<div class="panel"><div class="between"><h3>Enemies</h3><span class="sub">Active targets</span></div><div id="combatEnemies" class="enemy-row"></div></div>
+<div class="panel"><div class="between"><h3>Allied Characters</h3><span class="sub" id="combatEssence">Relic Essence: 0</span></div><div id="combatParty" class="party-row"></div></div>
+<div class="panel"><div class="between"><h3>Combat Log</h3><button class="secondary small" onclick="clearLog()">Clear</button></div><div id="combatLog" class="list"></div></div>
+</div>
+<div id="results" class="hidden"></div>
+</section>
+<footer>Damage Calculator Game · Data saved locally in this browser</footer>
+</main><div id="modal" class="modal hidden"><div class="modalbox" id="modalContent"></div></div><div id="toast" class="toast hidden"></div>
+<script>
+const KEY='dcg_v1';
+let db=load(), battle=null, pendingAction=null;
+db.relics=Array.isArray(db.relics)?db.relics:[];
+db.relicEssence=Math.max(0,Math.floor(num(db.relicEssence,0)));
+db.discardedEssence=Math.max(0,Math.floor(num(db.discardedEssence,0)));
+db.relicEquipSelection=Array.isArray(db.relicEquipSelection)?db.relicEquipSelection:[];
+db.relicRanges=db.relicRanges||defaultRelicRanges();
+{let defaults=defaultRelicRanges();for(let kind of ['main','sub']){db.relicRanges[kind]=db.relicRanges[kind]||{};for(let [id,range] of Object.entries(defaults[kind]))db.relicRanges[kind][id]=db.relicRanges[kind][id]||range;}}
+db.factionTags=Array.isArray(db.factionTags)?db.factionTags:[];
+db.elementTags=Array.isArray(db.elementTags)?db.elementTags:[];
+db.mindTagSettings=db.mindTagSettings&&typeof db.mindTagSettings==='object'?db.mindTagSettings:{};
+db.characters.forEach(c=>{
+ c.equippedRelics=c.equippedRelics||{soul:null,body:null,spirit:null};
+ c.stats=c.stats||{};if(c.stats.energyRegen===undefined)c.stats.energyRegen=100;
+ c.faction=Array.isArray(c.faction)?c.faction:(c.faction?[c.faction]:[]);
+ c.element=Array.isArray(c.element)?c.element:(c.element?[c.element]:[]);
+ c.faction.forEach(t=>{if(t&&!db.factionTags.includes(t))db.factionTags.push(t)});
+ c.element.forEach(t=>{if(t&&!db.elementTags.includes(t))db.elementTags.push(t)});
+});
+db.enemies.forEach(e=>{e.essenceDrop=Math.max(0,Math.floor(num(e.essenceDrop,0)));});
+function blank(){return {characters:[],enemies:[],tags:[]}}
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||blank()}catch{return blank()}}
+function save(){localStorage.setItem(KEY,JSON.stringify(db))}
+function uid(){return Math.random().toString(36).slice(2,10)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function num(v,d=0){let n=Number(v);return Number.isFinite(n)?n:d}
+function toast(s){let t=document.getElementById('toast');t.textContent=s;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),2300)}
+function modal(html){let content=document.getElementById('modalContent');content.classList.remove('relic-range-layout');content.innerHTML=html;document.getElementById('modal').classList.remove('hidden')}
+function closeModal(){document.getElementById('modal').classList.add('hidden')}
+function confirmBox(message,yes){modal(`<h2>Confirm action</h2><p>${esc(message)}</p><div class="row" style="justify-content:flex-end;margin-top:18px"><button class="secondary" onclick="closeModal()">Cancel</button><button class="danger" id="confirmYes">Confirm</button></div>`);document.getElementById('confirmYes').onclick=()=>{closeModal();yes()}}
+document.querySelectorAll('#mainnav button').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+function showPage(p){document.querySelectorAll('#mainnav button').forEach(b=>b.classList.toggle('active',b.dataset.page===p));document.getElementById('createPage').classList.toggle('hidden',p!=='create');document.getElementById('battlePage').classList.toggle('hidden',p!=='battle');document.getElementById('settingsPage').classList.toggle('hidden',p!=='settings');if(p==='battle'&&!battle)renderSetup();if(p==='settings')renderTags()}
+document.querySelectorAll('#createPage .tabs button, #settingsPage .tabs button').forEach(b=>b.onclick=()=>{let section=b.closest('section');section.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x===b));let ids=section.id==='createPage'?['characters','enemies','relicEquip','relicInventory']:['tags','factionTags','elementTags','relicSettings','others'];ids.forEach(t=>document.getElementById(t+'Tab').classList.toggle('hidden',t!==b.dataset.tab));if(b.dataset.tab==='tags')renderTags();if(b.dataset.tab==='factionTags')renderTaxonomyTags('factionTags');if(b.dataset.tab==='elementTags')renderTaxonomyTags('elementTags');if(b.dataset.tab==='relicSettings')renderRelicSettings();if(b.dataset.tab==='others')renderOthers();if(b.dataset.tab==='relicEquip')renderRelicEquip();if(b.dataset.tab==='relicInventory')renderRelicInventory()});
+
+const RELIC_STAT_DEFS=[
+ {id:'hp_flat',label:'HP',key:'maxHp',unit:'flat',suffix:''},
+ {id:'hp_pct',label:'HP%',key:'maxHp',unit:'percent',suffix:'%'},
+ {id:'atk_flat',label:'ATK',key:'atk',unit:'flat',suffix:''},
+ {id:'atk_pct',label:'ATK%',key:'atk',unit:'percent',suffix:'%'},
+ {id:'def_flat',label:'DEF',key:'def',unit:'flat',suffix:''},
+ {id:'def_pct',label:'DEF%',key:'def',unit:'percent',suffix:'%'},
+ {id:'mastery_flat',label:'Power Mastery',key:'mastery',unit:'flat',suffix:''},
+ {id:'critRate_flat',label:'Crit Rate',key:'critRate',unit:'flat',suffix:'%'},
+ {id:'critDmg_flat',label:'Crit DMG',key:'critDmg',unit:'flat',suffix:'%'},
+ {id:'energyRegen_flat',label:'Energy Regeneration',key:'energyRegen',unit:'flat',suffix:'%'}
+];
+const RELIC_MAIN_OPTIONS={
+ soul:['hp_flat'],
+ body:['atk_flat'],
+ spirit:['hp_pct','atk_pct','def_flat','def_pct','mastery_flat','critRate_flat','critDmg_flat','energyRegen_flat']
+};
+const RELIC_SLOT_LABELS={soul:'Soul',body:'Body',spirit:'Spirit / Mind',mind:'Mind'};
+function defaultRelicRanges(){
+ let main={hp_flat:{min:500,max:1200},atk_flat:{min:100,max:300},hp_pct:{min:5,max:15},atk_pct:{min:5,max:15},def_flat:{min:50,max:150},def_pct:{min:5,max:15},mastery_flat:{min:20,max:80},critRate_flat:{min:2,max:8},critDmg_flat:{min:5,max:20},energyRegen_flat:{min:10,max:30}};
+ let sub={hp_flat:{min:100,max:500},atk_flat:{min:10,max:50},def_flat:{min:10,max:50},hp_pct:{min:2,max:8},atk_pct:{min:2,max:8},def_pct:{min:2,max:8},mastery_flat:{min:5,max:30},critRate_flat:{min:1,max:4},critDmg_flat:{min:2,max:10},energyRegen_flat:{min:2,max:8}};
+ return {main,sub};
+}
+function relicStatDef(id){return RELIC_STAT_DEFS.find(x=>x.id===id)||RELIC_STAT_DEFS[0]}
+function relicFormatStat(stat){if(stat?.tagType)return `${esc(stat.tag)} Tag Damage +${fmt(stat.value)}%`;let d=relicStatDef(stat.stat);return `${d.label} +${fmt(stat.value)}${d.suffix}`}
+function getEquippedRelic(cuid,slot){let c=db.characters.find(x=>x.uid===cuid);let rid=c?.equippedRelics?.[slot];return db.relics.find(r=>r.uid===rid)||null}
+function relicOwner(rid){return db.characters.find(c=>Object.values(c.equippedRelics||{}).includes(rid))||null}
+function relicStatTotals(cuid){
+ let flat={atk:0,maxHp:0,def:0,mastery:0,critRate:0,critDmg:0,energyRegen:0},mainFlat={atk:0,maxHp:0,def:0,mastery:0,critRate:0,critDmg:0,energyRegen:0},percent={atk:0,maxHp:0,def:0};
+ for(let slot of ['soul','body','spirit']){
+  let r=getEquippedRelic(cuid,slot);if(!r)continue;
+  let entries=[{st:r.kind==='mind'?null:r.main,isMain:true},...(r.subs||[]).map(st=>({st,isMain:false}))];
+  for(let {st,isMain} of entries){if(!st||!st.stat)continue;let d=relicStatDef(st.stat),value=safeNumber(st.value);if(st.unit==='percent'&&['atk','maxHp','def'].includes(d.key))percent[d.key]+=value;else{flat[d.key]+=value;if(isMain)mainFlat[d.key]+=value;}}
+ }
+ return {flat,mainFlat,percent};
+}
+function mindTagKey(type,tag){return `${type}::${tag}`;}
+function mindTagSetting(type,tag){return db.mindTagSettings[mindTagKey(type,tag)]||{enabled:false,min:5,max:15};}
+function mindEligibleTags(){return [...db.tags.map(tag=>({type:'skill',tag})),...db.factionTags.map(tag=>({type:'faction',tag})),...db.elementTags.map(tag=>({type:'element',tag}))];}
+function mindTagBonus(c,skillTags=[]){let r=getEquippedRelic(c.uid,'spirit');if(!r||r.kind!=='mind'||!r.main?.tagType)return 0;let m=r.main,matched=m.tagType==='skill'?skillTags.includes(m.tag):m.tagType==='faction'?(c.faction||[]).includes(m.tag):(c.element||[]).includes(m.tag);return matched?safeNumber(m.value):0;}
+function mindTagStat(c){let r=getEquippedRelic(c.uid,'spirit');if(!r||r.kind!=='mind'||!r.main?.tagType)return null;let m=r.main,type=({skill:'Skill',faction:'Faction',element:'Element'})[m.tagType]||'Tag';return {label:`${type} Tag Bonus (${m.tag})`,value:safeNumber(m.value)};}
+function renderMindTagSettings(){for(let [type,id] of [['skill','tagList'],['faction','factionTagList'],['element','elementTagList']]){let el=document.getElementById(id);if(!el)continue;let tags=type==='skill'?db.tags:type==='faction'?db.factionTags:db.elementTags;el.innerHTML=tags.map(tag=>{let cfg=mindTagSetting(type,tag),safe=JSON.stringify(tag).replace(/"/g,'&quot;');return `<div class="item" style="margin:6px 0"><div class="between"><b>${esc(tag)}</b><div class="row"><label class="check"><input type="checkbox" ${cfg.enabled?'checked':''} onchange="toggleMindTag('${type}',${safe},this.checked)"> Mind Main Stat</label><button class="small danger" onclick="removeMindTag('${type}',${safe})">×</button></div></div>${cfg.enabled?`<div class="grid tight"><div class="field"><label>Minimum %</label><input type="number" step="any" value="${cfg.min}" onchange="setMindTagRange('${type}',${safe},'min',this.value)"></div><div class="field"><label>Maximum %</label><input type="number" step="any" value="${cfg.max}" onchange="setMindTagRange('${type}',${safe},'max',this.value)"></div></div>`:''}</div>`}).join('')||'<p class="sub">No tags created.</p>';}}
+function removeMindTag(type,tag){if(type==='skill')removeTag(tag);else removeTaxonomyTag(type==='faction'?'factionTags':'elementTags',tag);}
+function toggleMindTag(type,tag,enabled){let key=mindTagKey(type,tag),cfg=mindTagSetting(type,tag);db.mindTagSettings[key]={...cfg,enabled};save();renderMindTagSettings();}
+function setMindTagRange(type,tag,field,value){let key=mindTagKey(type,tag),cfg={...mindTagSetting(type,tag)},n=num(value,0);cfg[field]=n;if(cfg.max<cfg.min){toast('Maximum must be at least minimum.');cfg[field]=field==='min'?cfg.max:cfg.min;}db.mindTagSettings[key]=cfg;save();renderMindTagSettings();}
+function relicAllStatsHTML(r){
+ return `<div class="sub"><b>Main:</b> ${relicFormatStat(r.main)}</div>${(r.subs||[]).map(st=>`<div class="sub">${relicFormatStat(st)}</div>`).join('')}`;
+}
+function combatRelicHTML(c){
+ let rows=['soul','body','spirit'].map(slot=>{let r=getEquippedRelic(c.uid,slot);return r?`<div class="relic-combat-entry"><b>${RELIC_SLOT_LABELS[slot]} · ${esc(r.name)}</b><div>${relicFormatStat(r.main)}</div><div class="sub">${(r.subs||[]).map(relicFormatStat).join(' · ')}</div></div>`:`<div class="relic-combat-entry"><b>${RELIC_SLOT_LABELS[slot]}</b><div class="sub">Empty</div></div>`}).join('');
+ return `<details class="buff-details relic-combat"><summary>Equipped Relics</summary><div class="relic-combat-list">${rows}</div></details>`;
+}
+function renderRelicSettings(){
+ let content=document.getElementById('relicSettingsContent');if(!content)return;
+ let ranges=db.relicRanges||defaultRelicRanges();
+ let group=(kind,title)=>`<div class="panel"><h3>${title}</h3><div class="list">${RELIC_STAT_DEFS.map(d=>{let v=ranges[kind][d.id]||{min:0,max:0};return `<div class="item"><div class="between"><b>${d.label}</b><span class="sub">${kind==='main'?'Main stat roll':'Substat roll'}</span></div><div class="grid tight"><div class="field"><label>Minimum</label><input type="number" step="any" id="relic_${kind}_${d.id}_min" value="${v.min}"></div><div class="field"><label>Maximum</label><input type="number" step="any" id="relic_${kind}_${d.id}_max" value="${v.max}"></div></div></div>`}).join('')}</div></div>`;
+ content.innerHTML=`<div class="between"><div><h2>Relic Settings</h2><div class="sub">Set the random roll ranges used when generating relic main stats and substats.</div></div><button onclick="saveRelicSettings()">Save Ranges</button></div><div class="notice" style="margin:10px 0">Soul always rolls HP flat. Body always rolls ATK flat. Spirit and Mind share one equipment slot; Mind uses enabled tag-based damage bonuses. Spirit can roll HP%, ATK%, DEF flat, DEF%, Power Mastery flat, Crit Rate, Crit DMG, or Energy Regeneration. Substats can roll from all listed stats.</div>${group('main','Main Stat Ranges')}${group('sub','Substat Ranges')}<div class="row" style="justify-content:flex-end"><button onclick="saveRelicSettings()">Save Ranges</button></div>`;
+}
+function saveRelicSettings(){
+ let next={main:{},sub:{}};
+ for(let kind of ['main','sub'])for(let d of RELIC_STAT_DEFS){
+  let min=num(document.getElementById(`relic_${kind}_${d.id}_min`)?.value,0),max=num(document.getElementById(`relic_${kind}_${d.id}_max`)?.value,0);
+  if(max<min)return toast(`${d.label}: maximum must be at least the minimum.`);
+  next[kind][d.id]={min,max};
+ }
+ db.relicRanges=next;save();toast('Relic roll ranges saved.');
+}
+function renderRelicEquip(){
+ let el=document.getElementById('relicEquipContent');if(!el)return;
+ db.relicEquipSelection=Array.isArray(db.relicEquipSelection)?db.relicEquipSelection:[];
+ db.relicEquipSelection=db.relicEquipSelection.filter((id,i,a)=>db.characters.some(c=>c.uid===id)&&a.indexOf(id)===i).slice(0,3);
+ while(db.relicEquipSelection.length<Math.min(3,db.characters.length)){
+  let next=db.characters.find(c=>!db.relicEquipSelection.includes(c.uid));
+  if(!next)break;
+  db.relicEquipSelection.push(next.uid);
+ }
+ let selected=db.relicEquipSelection.map(id=>db.characters.find(c=>c.uid===id)).filter(Boolean);
+ const statRows=c=>{
+  let final=liveStats(c);
+  let labels=[['maxHp','Max HP'],['atk','ATK'],['def','DEF'],['mastery','Power Mastery'],['critRate','Crit Rate'],['critDmg','Crit DMG'],['energyRegen','Energy Regeneration']];
+  let mind=mindTagStat(c);return `<div class="grid tight" style="margin-top:8px">${labels.map(([key,label])=>`<div class="item"><div class="sub">${label}</div><b>${fmt(final[key])}${['critRate','critDmg','energyRegen'].includes(key)?'%':''}</b></div>`).join('')}${mind?`<div class="item"><div class="sub">${esc(mind.label)}</div><b>+${fmt(mind.value)}%</b></div>`:''}</div>`;
+ };
+ const characterCard=c=>`<div class="panel"><div class="between"><div><b>${esc(c.name)}</b> <span class="tag">${esc(c.id)}</span></div><span class="sub">Final stats including relics</span></div>${statRows(c)}<h3 style="margin-top:14px">Equipped Relics</h3><div class="grid tight">${['soul','body','spirit'].map(slot=>{let r=getEquippedRelic(c.uid,slot);return `<div class="item"><div class="between"><b>${slot==='spirit'?'Spirit / Mind':RELIC_SLOT_LABELS[slot]}</b><button class="secondary small" onclick="openRelicEquipPicker('${c.uid}','${slot}')">${r?'Change':'Equip'}</button></div>${r?`<div style="margin-top:5px"><b>${esc(r.name)}</b></div>${relicAllStatsHTML(r)}<button class="danger small" style="margin-top:6px" onclick="unequipRelic('${c.uid}','${slot}')">Unequip</button>`:'<div class="sub">No relic equipped</div>'}</div>`}).join('')}</div></div>`;
+ el.innerHTML=`<div class="between"><div><h2>Relic Equip</h2><div class="sub">Choose up to three characters to manage and inspect. Equipment stays assigned to each character even when they are not selected here.</div></div><span class="tag">Essence: ${db.relicEssence}</span></div>
+ <div class="panel"><h3>Selected Characters</h3><div class="grid tight">${[0,1,2].map(i=>`<div class="field"><label>Character ${i+1}</label><select id="relicEquipSelect${i}" onchange="updateRelicEquipSelection(${i},this.value)"><option value="">— Select character —</option>${db.characters.map(c=>`<option value="${c.uid}" ${db.relicEquipSelection[i]===c.uid?'selected':''}>${esc(c.name)} (${esc(c.id)})</option>`).join('')}</select></div>`).join('')}</div><div class="sub">Changing this selection only changes which characters are displayed. It never unequips or moves relics.</div></div>
+ ${selected.map(characterCard).join('')||'<p class="sub">Create characters, then select up to three above.</p>'}`;
+ save();
+}
+function updateRelicEquipSelection(index,value){
+ db.relicEquipSelection=Array.isArray(db.relicEquipSelection)?db.relicEquipSelection:[];
+ if(value&&db.relicEquipSelection.some((id,i)=>i!==index&&id===value)){toast('Choose a different character for each slot.');renderRelicEquip();return;}
+ db.relicEquipSelection[index]=value||null;
+ db.relicEquipSelection=db.relicEquipSelection.filter(Boolean);
+ save();renderRelicEquip();
+}
+function openRelicEquipPicker(cuid,slot,kind='spirit'){
+ let available=db.relics.filter(r=>r.slot===slot&&(slot!=='spirit'||(r.kind||'spirit')===kind)).slice().sort((a,b)=>Number(!!b.favorite)-Number(!!a.favorite));
+ modal(`<h2>Equip ${slot==='spirit'?'Spirit / Mind':RELIC_SLOT_LABELS[slot]} Relic</h2>${slot==='spirit'?`<div class="tabs"><button class="${kind==='spirit'?'active':''}" onclick="openRelicEquipPicker('${cuid}','spirit','spirit')">Spirit</button><button class="${kind==='mind'?'active':''}" onclick="openRelicEquipPicker('${cuid}','spirit','mind')">Mind</button></div>`:''}<div class="sub">Equipped relics remain visible. A relic already assigned to a character cannot be equipped again.</div><div class="list" style="margin-top:10px">${available.map(r=>{let owner=relicOwner(r.uid),locked=!!owner,label=owner?(owner.uid===cuid?'Equipped':`Using: ${esc(owner.name)}`):'Equip';return `<div class="item"><div class="between"><div><b>${r.favorite?'★ ':''}${esc(r.name)}</b><span class="tag">${r.kind==='mind'?'Mind':r.slot==='spirit'?'Spirit':RELIC_SLOT_LABELS[r.slot]}</span></div>${owner?`<span class="tag">Equipped</span>`:''}</div>${relicAllStatsHTML(r)}<button style="margin-top:7px" ${locked?'disabled class="secondary"':''} onclick="equipRelic('${cuid}','${slot}','${r.uid}')">${label}</button></div>`}).join('')||'<p class="sub">No relics of this slot yet. Obtain one in Relic Inventory.</p>'}</div><div class="row" style="justify-content:flex-end;margin-top:12px"><button class="secondary" onclick="closeModal()">Close</button></div>`);
+}
+function equipRelic(cuid,slot,rid){
+ let c=db.characters.find(x=>x.uid===cuid),r=db.relics.find(x=>x.uid===rid);if(!c||!r||r.slot!==slot)return;
+ let owner=relicOwner(rid);if(owner&&owner.uid!==cuid)return toast('That relic is already equipped by another character.');
+ c.equippedRelics=c.equippedRelics||{soul:null,body:null,spirit:null};c.equippedRelics[slot]=rid;save();closeModal();renderRelicEquip();renderRelicInventory();toast(`${r.name} equipped by ${c.name}.`);
+}
+function unequipRelic(cuid,slot){let c=db.characters.find(x=>x.uid===cuid);if(!c)return;c.equippedRelics=c.equippedRelics||{};c.equippedRelics[slot]=null;save();renderRelicEquip();renderRelicInventory();}
+function renderRelicInventory(){
+ let el=document.getElementById('relicInventoryContent');if(!el)return;
+ let ordered=db.relics.slice().sort((a,b)=>Number(!!b.favorite)-Number(!!a.favorite)||(b.createdAt||0)-(a.createdAt||0));
+ el.innerHTML=`<div class="between"><div><h2>Relic Inventory</h2><div class="sub">Shared inventory · Spirit and Mind share one slot; each relic can be equipped by only one character. Favourited relics stay pinned at the top.</div></div><div class="row" style="flex-wrap:wrap"><span class="tag">${db.relicEssence} Relic Essence</span><span class="tag">${db.discardedEssence} Discarded</span><button class="secondary" onclick="convertDiscardedEssence()" ${db.discardedEssence<3?'disabled':''}>Convert</button><button onclick="openRelicRollMenu()">+ Obtain Relic</button></div></div><div class="list" style="margin-top:12px">${ordered.map(r=>{let owner=relicOwner(r.uid);return `<div class="item"><div class="between"><div><b>${r.favorite?'★ ':''}${esc(r.name)}</b><span class="tag">${r.kind==='mind'?'Mind':r.slot==='spirit'?'Spirit':RELIC_SLOT_LABELS[r.slot]}</span></div><span class="tag">${owner?'Equipped: '+esc(owner.name):'Unequipped'}</span></div>${relicAllStatsHTML(r)}<div class="row" style="justify-content:flex-end;margin-top:7px"><button class="secondary small" onclick="toggleRelicFavorite('${r.uid}')">${r.favorite?'★ Favourited':'☆ Favourite'}</button><button class="danger small" onclick="deleteRelic('${r.uid}')">Delete</button></div></div>`}).join('')||'<p class="sub">Your relic inventory is empty. Use + Obtain Relic to generate one.</p>'}</div>`;
+}
+function toggleRelicFavorite(rid){
+ let r=db.relics.find(x=>x.uid===rid);if(!r)return;
+ r.favorite=!r.favorite;save();renderRelicInventory();
+ if(!document.getElementById('modal').classList.contains('hidden')&&window.lastRelicRewardUid===rid)showRelicReward(r);
+}
+function openRelicRollMenu(){
+ modal(`<h2>Obtain a Relic</h2><div class="sub">Spend Relic Essence to generate a random relic. Main stat and three substats are rolled within your configured ranges.</div><div class="list" style="margin-top:12px"><button onclick="relicRoll(null)">Random Relic · 1 Essence</button><button class="secondary" onclick="relicRoll('soul')">Soul Relic · 2 Essence</button><button class="secondary" onclick="relicRoll('body')">Body Relic · 2 Essence</button><button class="secondary" onclick="relicRoll('spirit')">Spirit Relic · 3 Essence</button><button class="secondary" onclick="relicRoll('mind')">Mind Relic · 3 Essence</button><button class="secondary" onclick="openSpecificRelicBuilder()">＋ Add Specific Relic</button></div><div class="row" style="justify-content:flex-end;margin-top:12px"><button class="secondary" onclick="closeModal()">Cancel</button></div>`);
+}
+
+let specificRelicDraft={kind:null,main:null,subs:[]};
+function openSpecificRelicBuilder(){specificRelicDraft={kind:null,main:null,subs:[]};renderSpecificRelicBuilder();}
+function specificRelicMainOptions(){
+ let d=specificRelicDraft;if(!d.kind)return [];
+ if(d.kind==='mind')return mindEligibleTags().filter(x=>mindTagSetting(x.type,x.tag).enabled).map(x=>({key:`${x.type}::${x.tag}`,label:`${({skill:'Skill',faction:'Faction',element:'Element'})[x.type]} Tag: ${x.tag}`,value:{tagType:x.type,tag:x.tag}}));
+ return RELIC_MAIN_OPTIONS[d.kind==='spirit'?'spirit':d.kind].map(id=>({key:id,label:relicStatDef(id).label,value:id}));
+}
+function renderSpecificRelicBuilder(){
+ let d=specificRelicDraft,types=[{id:'soul',label:'Soul',cost:2},{id:'body',label:'Body',cost:2},{id:'spirit',label:'Spirit',cost:3},{id:'mind',label:'Mind',cost:3}],opts=specificRelicMainOptions(),subOptions=RELIC_STAT_DEFS;
+ let base=d.kind?types.find(x=>x.id===d.kind).cost:0,mainCost=d.main?10:0,subCost=d.subs.length*30;
+ let selectedMain=d.main?(d.kind==='mind'?`${({skill:'Skill',faction:'Faction',element:'Element'})[d.main.tagType]} Tag: ${d.main.tag}`:relicStatDef(d.main).label):'Not selected';
+ modal(`<div class="between"><div><h2>Add Specific Relic</h2><div class="sub">Choose a relic type, main stat, and optionally 1–3 substats.</div></div><span class="tag">Custom Relic</span></div>
+ <div class="panel" style="margin-top:12px"><h3>1. Relic Type</h3><div class="grid tight">${types.map(t=>`<button class="${d.kind===t.id?'':'secondary'}" onclick="chooseSpecificRelicType('${t.id}')">${t.label}<br><small>${t.cost} Relic Essence</small></button>`).join('')}</div></div>
+ ${d.kind?`<div class="panel"><h3>2. Main Stat <span class="tag">Required · +10 Discarded Essence</span></h3><div class="grid tight">${opts.map((o,i)=>`<button class="${d.main&&(d.kind==='mind'?d.main.tagType+'::'+d.main.tag===o.key:d.main===o.value)?'':'secondary'}" onclick="chooseSpecificRelicMain(${i})">${esc(o.label)}</button>`).join('')||'<div class="sub">No enabled Mind tags. Enable at least one tag under Mind Main Stat in Settings first.</div>'}</div><div class="sub" style="margin-top:8px">Selected: <b>${esc(selectedMain)}</b></div></div>
+ <div class="panel"><h3>3. Substats <span class="tag">Optional · 30 Discarded Essence each</span></h3><div class="sub">Choose 1–3 distinct substats. Any remaining slots will be randomized.</div><div class="grid tight" style="margin-top:10px">${subOptions.map((o,i)=>`<button class="${d.subs.includes(o.id)?'':'secondary'}" onclick="toggleSpecificRelicSub(${i})">${d.subs.includes(o.id)?'✓ ':''}${esc(o.label)}</button>`).join('')}</div><div class="sub" style="margin-top:8px">Selected: ${d.subs.length}/3</div></div>`:''}
+ <div class="panel"><h3>Cost Summary</h3><div class="between"><span>Relic Essence</span><b>${base} required · ${db.relicEssence} available</b></div><div class="between"><span>Discarded Essence</span><b>${mainCost+subCost} required · ${db.discardedEssence} available</b></div><div class="divider"></div><div class="between"><b>Total cost</b><b>${base} Relic Essence + ${mainCost+subCost} Discarded Essence</b></div></div>
+ <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="secondary" onclick="closeModal()">Cancel</button><button onclick="createSpecificRelic()" ${!d.kind||!d.main||d.subs.length>3||db.relicEssence<base||db.discardedEssence<mainCost+subCost?'disabled':''}>Create Relic</button></div>`);
+}
+function chooseSpecificRelicType(kind){specificRelicDraft={kind,main:null,subs:[]};renderSpecificRelicBuilder();}
+function chooseSpecificRelicMain(index){let opts=specificRelicMainOptions();if(!opts[index])return;specificRelicDraft.main=opts[index].value;renderSpecificRelicBuilder();}
+function toggleSpecificRelicSub(index){let id=RELIC_STAT_DEFS[index]?.id;if(!id)return;let a=specificRelicDraft.subs;if(a.includes(id))specificRelicDraft.subs=a.filter(x=>x!==id);else if(a.length<3)a.push(id);else return toast('Choose no more than 3 substats.');renderSpecificRelicBuilder();}
+function rollSpecificMain(kind,mainChoice){
+ if(kind==='mind'){let cfg=mindTagSetting(mainChoice.tagType,mainChoice.tag);return {tagType:mainChoice.tagType,tag:mainChoice.tag,value:randomInRange({min:cfg.min,max:cfg.max}),unit:'percent'};}
+ return rollRelicStat(mainChoice,'main');
+}
+function createSpecificRelic(){
+ let d=specificRelicDraft;if(!d.kind||!d.main)return toast('Choose a relic type and main stat first.');
+ if(d.subs.length>3)return toast('Choose up to 3 substats.');
+ let base=['spirit','mind'].includes(d.kind)?3:2,discarded=10+d.subs.length*30;
+ if(db.relicEssence<base)return toast(`Not enough Relic Essence. You need ${base}.`);
+ if(db.discardedEssence<discarded)return toast(`Not enough Discarded Essence. You need ${discarded}.`);
+ let chosenSubs=d.subs.slice(),pool=RELIC_STAT_DEFS.map(x=>x.id).filter(id=>!chosenSubs.includes(id));
+ while(chosenSubs.length<3){if(!pool.length)break;let n=Math.floor(Math.random()*pool.length);chosenSubs.push(pool.splice(n,1)[0]);}
+ let slot=d.kind==='mind'?'spirit':d.kind,main=rollSpecificMain(d.kind,d.main),subs=chosenSubs.map(id=>rollRelicStat(id,'sub'));
+ db.relicEssence-=base;db.discardedEssence-=discarded;
+ let relic={uid:uid(),slot,kind:d.kind,name:`${d.kind==='mind'?'Mind':d.kind==='spirit'?'Spirit':RELIC_SLOT_LABELS[slot]} Relic ${db.relics.length+1}`,main,subs,createdAt:Date.now(),favorite:true,customCreated:true};
+ db.relics.push(relic);save();renderRelicInventory();renderRelicEquip();showSpecificRelicReward(relic);
+}
+function relicRangeFor(r,st,isMain){
+ if(st?.tagType){let cfg=mindTagSetting(st.tagType,st.tag);return {min:safeNumber(cfg.min,5),max:safeNumber(cfg.max,15)};}
+ return db.relicRanges?.[isMain?'main':'sub']?.[st?.stat]||{min:0,max:0};
+}
+function relicRangeEntryHTML(r,st,label,isMain){
+ let range=relicRangeFor(r,st,isMain),value=safeNumber(st?.value),span=range.max-range.min,pct=span>0?Math.max(0,Math.min(100,(value-range.min)/span*100)):100;
+ return `<div class="relic-range-entry"><b>${esc(label)} · ${relicFormatStat(st)}</b><div class="range-values">Configured range: ${fmt(range.min)} – ${fmt(range.max)}${st?.tagType?'%':relicStatDef(st.stat).suffix}</div><div class="range-score">${Math.round(pct)}% of the range · ${fmt(value)} / ${fmt(range.max)}</div></div>`;
+}
+function relicRangePanelHTML(r){return `<aside class="relic-range-panel" id="relicRangePanel"><div class="relic-range-head"><h3>Stat Roll Ranges</h3></div><p class="sub">Compare each roll with its configured maximum.</p>${relicRangeEntryHTML(r,r.main,'Main Stat',true)}${(r.subs||[]).map((st,i)=>relicRangeEntryHTML(r,st,`Substat ${i+1}`,false)).join('')}<p class="sub" style="margin-top:8px">100% means the roll reached the maximum. 0% means it is at the minimum.</p></aside>`;}
+function toggleRelicRangePanel(force){let box=document.getElementById('modalContent'),panel=document.getElementById('relicRangePanel');if(!box||!panel)return;let show=force===undefined?panel.classList.contains('hidden'):force;panel.classList.toggle('hidden',!show);box.classList.toggle('relic-range-layout',show);}
+function refreshRelicRangePanel(r){let old=document.getElementById('relicRangePanel');if(old){old.outerHTML=relicRangePanelHTML(r);document.getElementById('modalContent').classList.add('relic-range-layout');}}
+function renderSpecificRewardDetails(r){
+ let main=document.getElementById('specificRewardMain');if(main)main.innerHTML=`<b>${relicFormatStat(r.main)}</b>`;
+ let subs=document.getElementById('specificRewardSubs');if(subs)subs.innerHTML=(r.subs||[]).map((st,i)=>`<div class="between" style="margin:7px 0"><span>${i+1}. ${relicFormatStat(st)}</span><button class="secondary small" onclick="rerollSpecificSub('${r.uid}',${i})">Reroll · 20 Discarded</button></div>`).join('');
+ let costs=document.getElementById('specificRewardBalances');if(costs)costs.textContent=`Relic Essence: ${db.relicEssence} · Discarded Essence: ${db.discardedEssence}`;
+}
+function showSpecificRelicReward(r){
+ window.specificRewardUid=r.uid;
+ modal(`<div class="relic-reward-main"><div class="notice">Specific Relic Created!</div><div class="between" style="margin-top:10px"><h2>${esc(r.name)}</h2><span class="tag">★ Favourited</span></div><span class="tag">${r.kind==='mind'?'Mind':r.kind==='spirit'?'Spirit':RELIC_SLOT_LABELS[r.slot]} Relic</span>
+ <div class="item" style="margin-top:12px"><h3>Main Stat</h3><div id="specificRewardMain"><b>${relicFormatStat(r.main)}</b></div><div class="row" style="justify-content:flex-end;margin-top:8px"><button class="secondary small" onclick="rerollSpecificMain('${r.uid}')">Reroll Main Range · 5 Essence</button></div>
+ <h3 style="margin-top:14px">Substats</h3><div id="specificRewardSubs">${(r.subs||[]).map((st,i)=>`<div class="between" style="margin:7px 0"><span>${i+1}. ${relicFormatStat(st)}</span><button class="secondary small" onclick="rerollSpecificSub('${r.uid}',${i})">Reroll · 20 Discarded</button></div>`).join('')}</div></div>
+ <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="secondary" onclick="closeModal()">Done</button></div><div class="sub" id="specificRewardBalances" style="margin-top:8px">Relic Essence: ${db.relicEssence} · Discarded Essence: ${db.discardedEssence}</div></div>${relicRangePanelHTML(r)}`);
+ document.getElementById('modalContent').classList.add('relic-range-layout');
+}
+function rerollSpecificMain(rid){
+ let r=db.relics.find(x=>x.uid===rid);if(!r)return;
+ if(db.relicEssence<5)return toast('You need 5 Relic Essence to reroll the main stat range.');
+ db.relicEssence-=5;r.main=rollSpecificMain(r.kind,r.kind==='mind'?{tagType:r.main.tagType,tag:r.main.tag}:r.main.stat);
+ save();renderRelicInventory();renderSpecificRewardDetails(r);refreshRelicRangePanel(r);toast('Main stat range rerolled.')
+}
+function rerollSpecificSub(rid,index){
+ let r=db.relics.find(x=>x.uid===rid);if(!r||!r.subs?.[index])return;
+ if(db.discardedEssence<20)return toast('You need 20 Discarded Essence to reroll this substat.');
+ db.discardedEssence-=20;r.subs[index]=rollRelicStat(r.subs[index].stat,'sub');
+ save();renderRelicInventory();renderSpecificRewardDetails(r);refreshRelicRangePanel(r);toast(`Substat ${index+1} rerolled.`)
+}
+function randomInRange(range){let min=safeNumber(range?.min,0),max=safeNumber(range?.max,min);return Math.round((min+Math.random()*(max-min))*100)/100}
+function rollRelicStat(stat,kind){let d=relicStatDef(stat),range=db.relicRanges?.[kind]?.[stat]||{min:0,max:0};return {stat,unit:d.unit,value:randomInRange(range)}}
+function relicRoll(requestedSlot){
+ let kind=requestedSlot||['soul','body','spirit','mind'][Math.floor(Math.random()*4)],slot=kind==='mind'?'spirit':kind,cost=requestedSlot?(['spirit','mind'].includes(kind)?3:2):1;
+ if(db.relicEssence<cost)return toast(`Not enough Relic Essence. You need ${cost}.`);
+ db.relicEssence-=cost;
+ let mainOptions=RELIC_MAIN_OPTIONS[slot],mainId=mainOptions[Math.floor(Math.random()*mainOptions.length)],main=kind==='mind'?null:rollRelicStat(mainId,'main');if(kind==='mind'){let eligible=mindEligibleTags().filter(x=>mindTagSetting(x.type,x.tag).enabled);if(!eligible.length){db.relicEssence+=cost;save();return toast('Enable at least one tag as a Mind main stat in Settings first.');}let chosen=eligible[Math.floor(Math.random()*eligible.length)],cfg=mindTagSetting(chosen.type,chosen.tag);main={tagType:chosen.type,tag:chosen.tag,value:randomInRange({min:cfg.min,max:cfg.max}),unit:'percent'};}
+ let subPool=RELIC_STAT_DEFS.map(x=>x.id),subs=[];
+ while(subs.length<3){let id=subPool[Math.floor(Math.random()*subPool.length)];if(!subs.some(x=>x.stat===id))subs.push(rollRelicStat(id,'sub'));}
+ let relic={uid:uid(),slot,kind,name:`${kind==='mind'?'Mind':kind==='spirit'?'Spirit':RELIC_SLOT_LABELS[slot]} Relic ${db.relics.length+1}`,main,subs,createdAt:Date.now()};
+ db.relics.push(relic);save();window.lastRelicRollSlot=requestedSlot||null;showRelicReward(relic);renderRelicInventory();
+}
+function showRelicReward(r){
+ window.lastRelicRewardUid=r.uid;window.lastRelicRewardDeleted=false;
+ modal(`<div class="relic-reward-main"><div class="notice" id="rewardRelicStatus">Relic obtained!</div><h2 id="rewardRelicName" style="margin-top:10px">${esc(r.name)}</h2><span class="tag">${r.kind==='mind'?'Mind':r.slot==='spirit'?'Spirit':RELIC_SLOT_LABELS[r.slot]} Relic</span><div class="item" id="rewardRelicDetails" style="margin-top:10px"><h3>Main Stat</h3><div><b>${relicFormatStat(r.main)}</b></div><h3 style="margin-top:12px">Three Substats</h3>${(r.subs||[]).map(st=>`<div class="sub">${relicFormatStat(st)}</div>`).join('')}</div><div class="row" style="justify-content:space-between;margin-top:12px"><button class="secondary" onclick="toggleRelicFavorite('${r.uid}')">${r.favorite?'★ Favourited':'☆ Favourite this relic'}</button><span class="sub">${r.favorite?'Pinned to top of inventory':''}</span></div><div class="row" style="justify-content:space-between;margin-top:14px"><button class="secondary" onclick="closeModal()">Done</button><div class="row"><button class="danger" id="quickDeleteRelicBtn" onclick="quickDeleteRewardRelic('${r.uid}')">Delete</button><button onclick="relicRoll(window.lastRelicRollSlot)">Add Another</button></div></div><div class="sub" style="margin-top:8px">Remaining Relic Essence: <span id="rewardRelicEssence">${db.relicEssence}</span> · Discarded Essence: <span id="rewardDiscardedEssence">${db.discardedEssence}</span></div></div>${relicRangePanelHTML(r)}`);
+ document.getElementById('modalContent').classList.add('relic-range-layout');
+}
+function relicIsEquipped(rid){return !!relicOwner(rid);}
+function removeRelicAndRewardDiscarded(rid){
+ let r=db.relics.find(x=>x.uid===rid);if(!r)return false;
+ if(relicIsEquipped(rid)){toast('Unequip this relic before deleting it.');return false;}
+ if(r.favorite){toast('Unfavourite this relic before deleting it.');return false;}
+ db.relics=db.relics.filter(x=>x.uid!==rid);db.discardedEssence=(db.discardedEssence||0)+1;save();
+ renderRelicInventory();renderRelicEquip();
+ return true;
+}
+function quickDeleteRewardRelic(rid){
+ if(window.lastRelicRewardDeleted)return;
+ let r=db.relics.find(x=>x.uid===rid);if(!r)return;
+ if(!removeRelicAndRewardDiscarded(rid))return;
+ window.lastRelicRewardDeleted=true;
+ let name=document.getElementById('rewardRelicName'),details=document.getElementById('rewardRelicDetails'),status=document.getElementById('rewardRelicStatus'),btn=document.getElementById('quickDeleteRelicBtn');
+ if(name)name.style.color='#dc2626';if(details){details.style.color='#dc2626';details.querySelectorAll('.sub').forEach(x=>x.style.color='#dc2626');}
+ if(status){status.textContent='Deleted successfully · +1 Discarded Essence';status.style.background='#fee2e2';status.style.color='#b91c1c';}
+ if(btn){btn.textContent='Deleted';btn.disabled=true;}
+ let re=document.getElementById('rewardRelicEssence'),de=document.getElementById('rewardDiscardedEssence');if(re)re.textContent=db.relicEssence;if(de)de.textContent=db.discardedEssence;
+}
+function convertDiscardedEssence(){
+ let maxUnits=Math.floor((db.discardedEssence||0)/3),maxAmount=maxUnits*3;
+ if(maxUnits<1)return toast('You need at least 3 Discarded Essence to convert.');
+ modal(`<h2>Convert Discarded Essence</h2><p class="sub">Choose how much to convert. Every 3 Discarded Essence becomes 1 Relic Essence.</p><div class="panel" style="margin-top:12px"><div class="between"><b>Discarded Essence to convert</b><b id="convertDiscardedValue">3</b></div><input id="convertDiscardedSlider" type="range" min="3" max="${maxAmount}" step="3" value="3" style="width:100%;margin-top:12px"><div class="between sub"><span>3</span><span>${maxAmount}</span></div><p class="sub">You will receive <b id="convertRelicEssenceValue">1</b> Relic Essence.</p><p class="sub">Remaining after conversion: <b id="convertRemainingValue">${db.discardedEssence-3}</b> Discarded Essence.</p></div><div class="row" style="justify-content:flex-end;margin-top:14px"><button class="secondary" onclick="closeModal()">Cancel</button><button onclick="confirmDiscardedEssenceConversion()">Convert</button></div>`);
+ let slider=document.getElementById('convertDiscardedSlider');
+ slider.oninput=()=>{let v=Number(slider.value);document.getElementById('convertDiscardedValue').textContent=v;document.getElementById('convertRelicEssenceValue').textContent=v/3;document.getElementById('convertRemainingValue').textContent=db.discardedEssence-v;};
+}
+function confirmDiscardedEssenceConversion(){
+ let slider=document.getElementById('convertDiscardedSlider'),amount=Number(slider?.value);
+ if(!Number.isInteger(amount)||amount<3||amount%3!==0||amount>db.discardedEssence)return toast('Choose a valid amount to convert.');
+ let gained=amount/3;db.discardedEssence-=amount;db.relicEssence+=gained;save();closeModal();renderRelicInventory();renderOthers();
+ let re=document.getElementById('rewardRelicEssence'),de=document.getElementById('rewardDiscardedEssence');if(re)re.textContent=db.relicEssence;if(de)de.textContent=db.discardedEssence;
+ let label=document.getElementById('combatEssence');if(label)label.textContent=`Relic Essence: ${db.relicEssence}`;
+ toast(`Converted ${amount} Discarded Essence into ${gained} Relic Essence.`);
+}
+function deleteRelic(rid){let r=db.relics.find(x=>x.uid===rid);if(!r)return;if(relicIsEquipped(rid))return toast('Unequip this relic before deleting it.');if(r.favorite)return toast('Unfavourite this relic before deleting it.');confirmBox(`Delete ${r.name}?`,()=>{if(removeRelicAndRewardDiscarded(rid))toast('+1 Discarded Essence received.');});}
+function awardEnemyEssence(enemy){
+ if(!enemy||enemy.essenceAwarded)return;enemy.essenceAwarded=true;let amount=Math.max(0,Math.floor(safeNumber(enemy.essenceDrop,0)));
+ if(amount>0){db.relicEssence+=amount;save();log(`${enemy.name} defeated: +${amount} Relic Essence.`);}
+ let label=document.getElementById('combatEssence');if(label)label.textContent='Relic Essence: '+db.relicEssence;
+}
+
+function renderAll(){renderCharacters();renderEnemies();renderTags();renderRelicSettings();renderRelicEquip();renderRelicInventory();renderSetup()}
+function renderCharacters(){let el=document.getElementById('characterList');let ordered=db.characters.slice().sort((a,b)=>Number((b.id||'').replace(/\D/g,''))-Number((a.id||'').replace(/\D/g,'')));el.innerHTML=ordered.length?ordered.map(c=>`<div class="item"><div class="between"><div><b>${esc(c.name)}</b> <span class="tag">${esc(c.id)}</span><div class="sub">${esc(tagSummary(c.faction,'No faction'))} · ${esc(tagSummary(c.element,'No element'))} · ${c.skills.length} skills</div></div><div class="row"><button class="secondary small" onclick="editCharacter('${c.uid}')">Edit</button><button class="secondary small" onclick="manageSkills('${c.uid}')">Skills</button><button class="danger small" onclick="deleteCharacter('${c.uid}')">Delete</button></div></div></div>`).join(''):'<p class="sub">No characters created yet.</p>'}
+function newCharacter(){editCharacter(null)}
+function editCharacter(id){window.editingCharacterUid=id||null;window.stateSkillDrafts={};let c=db.characters.find(x=>x.uid===id)||{uid:uid(),id:'',name:'',faction:'',element:'',stats:{atk:100,maxHp:1000,def:0,mastery:0,critRate:5,critDmg:50,energyRegen:100},display:['atk','critDmg'],resources:[],mainEnergy:'',skills:[]};if(c.stats.energyRegen===undefined)c.stats.energyRegen=100;let isNew=!id;(c.states||[]).forEach(st=>window.stateSkillDrafts[st.uid]=JSON.parse(JSON.stringify(st.skills||[])));let statFields=[['atk','ATK'],['maxHp','Max HP'],['def','DEF'],['mastery','Power Mastery'],['critRate','Crit Rate %'],['critDmg','Crit DMG %'],['energyRegen','Energy Regeneration %']];modal(`<h2>${isNew?'Create':'Edit'} Character</h2><div class="grid"><div class="field"><label>Character ID (#001)</label><input id="c_id" value="${esc(c.id)}" placeholder="#001"></div><div class="field"><label>Character Name</label><input id="c_name" value="${esc(c.name)}"></div><div class="field"><label>Faction Tags</label>${tagPickerField(c.faction,'c_faction','Pick Faction Tags','factionTags')}</div><div class="field"><label>Element Tags</label>${tagPickerField(c.element,'c_element','Pick Element Tags','elementTags')}</div></div><h3>Base stats</h3><div class="grid">${statFields.map(([k,l])=>`<div class="field"><label>${l}</label><input type="number" id="c_${k}" min="0" value="${num(c.stats[k])}"></div>`).join('')}</div><h3>Combat Card Display Settings <span class="sub">(choose up to 3)</span></h3><div class="checks">${statFields.map(([k,l])=>`<label class="check"><input type="checkbox" name="c_display" value="${k}" ${c.display.includes(k)?'checked':''}>${l}</label>`).join('')}</div><h3 style="margin-top:14px">Resources <span class="sub">(maximum 5)</span></h3><div id="resourceEditor">${resourceRows(c.resources)}</div><button class="secondary small" onclick="addResourceRow()" ${c.resources.length>=5?'disabled':''}>+ Add resource</button><div class="field"><label>Main Energy Meter</label><select id="c_energy"><option value="">None</option>${c.resources.map(r=>`<option value="${esc(r.uid)}" ${c.mainEnergy===r.uid?'selected':''}>${esc(r.name)}</option>`).join('')}</select></div><h3 style="margin-top:16px">Passive Rules</h3><div class="sub">Gain this character's resource whenever a qualifying ability is used. Each passive can activate once per matching skill use, with no trigger limit across the battle.</div><div id="passiveEditor">${passiveRows(c.passives||[],c.resources)}</div><button class="secondary small" onclick="addPassiveRow()">+ Add Passive Rule</button><h3 style="margin-top:16px">Enhanced States</h3><div class="sub">Create temporary or resource-driven states that modify this character's stats and existing skills. Normal skill settings are preserved.</div><div id="stateEditor">${stateRows(c.states||[],c.resources,c.skills)}</div><button class="secondary small" onclick="addStateRow()">+ Add Enhanced State</button><div class="row" style="justify-content:flex-end;margin-top:18px"><button class="secondary" onclick="closeModal()">Cancel</button><button onclick="saveCharacter('${c.uid}',${isNew})">Save Character</button></div>`);
+document.querySelectorAll('.stateRow .st_method').forEach(toggleStateFields);document.querySelectorAll('input[name=c_display]').forEach(x=>x.onchange=()=>{let checked=[...document.querySelectorAll('input[name=c_display]:checked')];if(checked.length>3){x.checked=false;toast('Choose a maximum of 3 stats.')}});
+}
+function resourceRows(rs){return rs.map(r=>`<div class="item resourceRow" data-uid="${r.uid}"><div class="grid tight"><div class="field"><label>Name</label><input class="rname" value="${esc(r.name)}" placeholder="Energy"></div><div class="field"><label>Maximum (blank = unlimited)</label><input class="rmax" type="number" min="1" value="${r.max??''}" placeholder="Unlimited"></div></div><button class="danger small" onclick="this.closest('.resourceRow').remove();refreshEnergyOptions()">Remove</button></div>`).join('')}
+function addResourceRow(){let box=document.getElementById('resourceEditor');if(box.querySelectorAll('.resourceRow').length>=5)return toast('Maximum 5 resources.');let wrap=document.createElement('div');wrap.innerHTML=resourceRows([{uid:uid(),name:'',max:null}]);box.append(wrap.firstElementChild);refreshEnergyOptions()}
+function refreshEnergyOptions(){let s=document.getElementById('c_energy'),old=s.value;let vals=[...document.querySelectorAll('.resourceRow')].map(r=>({uid:r.dataset.uid,name:r.querySelector('.rname').value}));s.innerHTML='<option value="">None</option>'+vals.map(r=>`<option value="${r.uid}">${esc(r.name||'Unnamed resource')}</option>`).join('');if(vals.some(r=>r.uid===old))s.value=old}
+function passiveRows(passives,resources){return passives.map((p,i)=>`<div class="item passiveRow" data-uid="${esc(p.uid||uid())}"><div class="field"><label>Passive name</label><input class="p_name" value="${esc(p.name||'')}" placeholder="Flame Resonance"></div><div class="grid tight"><div class="field"><label>Ability user</label><select class="p_scope"><option value="others" ${p.scope!=='all'?'selected':''}>Any other character</option><option value="all" ${p.scope==='all'?'selected':''}>Any character, including owner</option></select></div><div class="field"><label>Tag matching</label><select class="p_mode"><option value="any" ${p.mode!=='all'?'selected':''}>Any selected tag</option><option value="all" ${p.mode==='all'?'selected':''}>All selected tags</option></select></div></div><div class="field"><label>Required ability tags</label>${tagPickerField(p.tags||[],`p_tags_${p.uid||i}`,'Pick Required Skill Tags','tags').replace(`id="p_tags_${p.uid||i}"`,`id="p_tags_${p.uid||i}" class="p_tags"`).replace(`id="p_tags_${p.uid||i}_summary"`,`id="p_tags_${p.uid||i}_summary"`)}</div><div class="grid tight"><div class="field"><label>Resource this character gains</label><select class="p_resource">${resources.map(r=>`<option value="${esc(r.uid)}" ${p.resource===r.uid?'selected':''}>${esc(r.name)}</option>`).join('')||'<option value="">No resources available</option>'}</select></div><div class="field"><label>Amount gained per activation</label><input class="p_amount" type="number" min="0" step="any" value="${safeNumber(p.amount,1)}"></div></div><button class="danger small" onclick="this.closest('.passiveRow').remove()">Remove passive</button></div>`).join('')}
+function addPassiveRow(){let c=document.querySelectorAll('.resourceRow');let resources=[...c].map(r=>({uid:r.dataset.uid,name:r.querySelector('.rname').value.trim()||'Unnamed resource'}));let box=document.getElementById('passiveEditor');let wrap=document.createElement('div');wrap.innerHTML=passiveRows([{uid:uid(),name:'',scope:'others',mode:'any',tags:[],resource:resources[0]?.uid||'',amount:1}],resources);box.append(wrap.firstElementChild)}
+
+function stateRows(states,resources,skills){
+ const statKeys=[['atk','ATK'],['maxHp','Max HP'],['def','DEF'],['mastery','Power Mastery'],['critRate','Crit Rate'],['critDmg','Crit DMG']];
+ return states.map(st=>`<div class="item stateRow" data-uid="${esc(st.uid||uid())}">
+ <div class="field"><label>State name</label><input class="st_name" value="${esc(st.name||'')}" placeholder="Awakened Form"></div>
+ <div class="grid tight"><div class="field"><label>Activation method</label><select class="st_method" onchange="toggleStateFields(this)"><option value="manual" ${st.method==='manual'?'selected':''}>Manual activation</option><option value="threshold" ${st.method==='threshold'?'selected':''}>Resource threshold</option><option value="consume" ${st.method==='consume'?'selected':''}>Consume resource</option><option value="skill" ${st.method==='skill'?'selected':''}>Using a selected skill</option></select></div><div class="field"><label>Duration in seconds (0 = no timer)</label><input class="st_duration" type="number" min="0" step="any" value="${safeNumber(st.duration,0)}"></div></div>
+ <div class="grid tight"><div class="field"><label>Resource</label><select class="st_resource"><option value="">Select resource</option>${resources.map(r=>`<option value="${esc(r.uid)}" ${st.resource===r.uid?'selected':''}>${esc(r.name)}</option>`).join('')}</select></div><div class="field st_activation"><label>Activation threshold</label><input class="st_activate" type="number" min="0" step="any" value="${safeNumber(st.activateAt,80)}"></div><div class="field st_deactivation"><label>Deactivation threshold</label><input class="st_deactivate" type="number" min="0" step="any" value="${safeNumber(st.deactivateAt,20)}"></div><div class="field st_consume"><label>Amount to consume</label><input class="st_cost" type="number" min="0" step="any" value="${safeNumber(st.cost,0)}"></div><div class="field st_skill"><label>Skill that activates this state</label><select class="st_triggerSkill"><option value="">Select skill</option>${skills.map(sk=>`<option value="${esc(sk.uid)}" ${st.triggerSkill===sk.uid?'selected':''}>${esc(sk.name)}</option>`).join('')}</select></div></div>
+ <div class="sub"><b>Stat changes</b> · Flat additions while active</div><div class="grid tight">${statKeys.map(([k,l])=>`<div class="field"><label>${l}</label><input class="st_stat" data-stat="${k}" type="number" step="any" value="${safeNumber(st.statMods?.[k],0)}"></div>`).join('')}</div>
+ <div class="item" style="margin-top:10px"><div class="between"><div><b>State Skill Set</b><div class="sub">These skills replace the character's normal skills while this state is active.</div></div><button class="secondary small" onclick="manageStateSkills('${esc(window.editingCharacterUid||'')}','${esc(st.uid||'')}')">Manage Skills</button></div><div class="sub stateSkillSummary" data-state-skills="${esc(st.uid||'')}">${(st.skills||[]).length} enhanced skill(s) configured</div></div>
+ <button class="danger small" onclick="this.closest('.stateRow').remove()">Remove state</button></div>`).join('');
+}
+function toggleStateFields(sel){let row=sel.closest('.stateRow'),m=sel.value;row.querySelector('.st_activation').classList.toggle('hidden',m!=='threshold');row.querySelector('.st_deactivation').classList.toggle('hidden',m!=='threshold');row.querySelector('.st_consume').classList.toggle('hidden',m!=='consume');row.querySelector('.st_skill').classList.toggle('hidden',m!=='skill');}
+function addStateRow(){let resources=[...document.querySelectorAll('.resourceRow')].map(r=>({uid:r.dataset.uid,name:r.querySelector('.rname').value.trim()||'Unnamed resource'}));let c=db.characters.find(x=>x.uid===window.editingCharacterUid);let skills=c?.skills||[];let box=document.getElementById('stateEditor'),wrap=document.createElement('div');wrap.innerHTML=stateRows([{uid:uid(),method:'manual',duration:0,statMods:{},skillMods:{}}],resources,skills);box.append(wrap.firstElementChild);toggleStateFields(box.lastElementChild.querySelector('.st_method'));}
+
+function saveCharacter(uid0,isNew){let id=document.getElementById('c_id').value.trim(),name=document.getElementById('c_name').value.trim();if(!/^#\d+$/.test(id)||!name)return toast('Enter a valid ID (#001) and character name.');if(db.characters.some(c=>c.id===id&&c.uid!==uid0))return toast('Character ID already exists.');let display=[...document.querySelectorAll('input[name=c_display]:checked')].map(x=>x.value);if(display.length>3)return toast('Maximum 3 displayed stats.');let stats={};['atk','maxHp','def','mastery','critRate','critDmg'].forEach(k=>stats[k]=Math.max(0,num(document.getElementById('c_'+k).value)));if(stats.critRate>100)return toast('Crit Rate cannot exceed 100%.');let resources=[...document.querySelectorAll('.resourceRow')].map(r=>({uid:r.dataset.uid,name:r.querySelector('.rname').value.trim(),max:r.querySelector('.rmax').value===''?null:Math.max(1,num(r.querySelector('.rmax').value))}));if(resources.length>5||resources.some(r=>!r.name))return toast('Resource names are required; maximum 5.');let passives=[...document.querySelectorAll('.passiveRow')].map(r=>({uid:r.dataset.uid,name:r.querySelector('.p_name').value.trim()||'Unnamed Passive',scope:r.querySelector('.p_scope').value,mode:r.querySelector('.p_mode').value,tags:JSON.parse(r.querySelector('.p_tags').value||'[]'),resource:r.querySelector('.p_resource').value,amount:Math.max(0,num(r.querySelector('.p_amount').value))}));if(passives.some(x=>!x.resource||!x.tags.length))return toast('Each passive needs an owner resource and at least one required tag.');
+let states=[...document.querySelectorAll('.stateRow')].map(r=>{let method=r.querySelector('.st_method').value,activateAt=Math.max(0,num(r.querySelector('.st_activate').value)),deactivateAt=Math.max(0,num(r.querySelector('.st_deactivate').value));return {uid:r.dataset.uid,name:r.querySelector('.st_name').value.trim()||'Unnamed State',method,duration:Math.max(0,num(r.querySelector('.st_duration').value)),resource:r.querySelector('.st_resource').value,activateAt,deactivateAt,cost:Math.max(0,num(r.querySelector('.st_cost').value)),triggerSkill:r.querySelector('.st_triggerSkill').value,statMods:Object.fromEntries([...r.querySelectorAll('.st_stat')].map(x=>[x.dataset.stat,num(x.value)])),skills:JSON.parse(JSON.stringify(window.stateSkillDrafts?.[r.dataset.uid]||[]))}});
+if(states.some(x=>x.method==='threshold'&&(!x.resource||x.activateAt<=x.deactivateAt)))return toast('Threshold states need a resource and activation threshold greater than deactivation threshold.');
+if(states.some(x=>(x.method==='consume'||x.method==='threshold')&&!x.resource))return toast('Select a resource for each resource-based state.');
+if(states.some(x=>x.method==='skill'&&!x.triggerSkill))return toast('Select the skill that activates each skill-triggered state.');
+let old=db.characters.find(c=>c.uid===uid0);let c={uid:uid0,id,name,passives,states,faction:JSON.parse(document.getElementById('c_faction').value||'[]'),element:JSON.parse(document.getElementById('c_element').value||'[]'),stats,display,resources,mainEnergy:document.getElementById('c_energy').value,skills:old?.skills||[],equippedRelics:old?.equippedRelics||{soul:null,body:null,spirit:null}};if(isNew)db.characters.push(c);else Object.assign(old,c);save();closeModal();renderAll();toast('Character saved.')}
+function deleteCharacter(id){let c=db.characters.find(x=>x.uid===id);confirmBox(`Delete ${c.name} and all of its skills?`,()=>{db.characters=db.characters.filter(x=>x.uid!==id);save();renderAll()})}
+function skillEstimateHTML(skill,character){
+ if(skill.scale==='resource')return '<div class="sub" style="margin-top:5px">Estimated damage: depends on the selected resource amount during battle.</div>';
+ let stat=safeNumber(character.stats?.[skill.scale],0),perHit=stat*safeNumber(skill.mult,100)/100;
+ let count=1,label='';
+ if(skill.type==='DoT'){count=Math.max(0,Math.floor((safeNumber(skill.duration,5)+1e-8)/Math.max(.1,safeNumber(skill.interval,1))));label='triggers';}
+ else if(skill.target==='Bounce'){count=Math.max(1,Math.floor(safeNumber(skill.hits,1)));label='bounces';}
+ let estimate=count>1?`${fmt(perHit)} × ${count} ${label} = ${fmt(perHit*count)}`:fmt(perHit);
+ return `<div class="sub" style="margin-top:5px">Estimated damage (base stats only): <b>${estimate}</b></div>`;
+}
+function manageSkills(cid){let c=db.characters.find(x=>x.uid===cid);modal(`<div class="between"><div><h2>${esc(c.name)} · Skills</h2><div class="sub">Skills are managed separately.</div></div><button onclick="skillEditor('${cid}',null)">+ Skill</button></div><div class="list" style="margin-top:12px">${c.skills.map(s=>`<div class="item"><div class="between"><div><b>${esc(s.name)}</b><div>${s.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div><div class="sub">${esc(s.description||'No description')}</div><div class="sub">${s.type} · ${s.target} · ${s.mult}%</div>${skillEstimateHTML(s,c)}</div><div class="row"><button class="secondary small" onclick="skillEditor('${cid}','${s.uid}')">Edit</button><button class="danger small" onclick="deleteSkill('${cid}','${s.uid}')">Delete</button></div></div></div>`).join('')||'<p class="sub">No skills yet.</p>'}</div><div class="row" style="justify-content:flex-end;margin-top:14px"><button class="secondary" onclick="closeModal()">Close</button></div>`)}
+function tagChecks(selected,name){return tagPickerField(selected,name,'Pick Skill Tags','tags')}
+function addTagFromEditor(name){let input=document.getElementById(name+'_new'),v=input.value.trim();if(!v)return;if(!db.tags.includes(v))db.tags.push(v);save();let selected=[...document.querySelectorAll('input[name='+name+']:checked')].map(x=>x.value);selected.push(v);document.getElementById('skillTagArea').innerHTML=tagChecks(selected,name);}
+window.currentSkillContext={};
+function autoUseSkillOptions(selected=''){
+ let all=[];
+ for(let ch of (db.characters||[])){
+  for(let sk of (ch.skills||[]))all.push({uid:sk.uid,label:`${ch.name} · ${sk.name}`});
+  for(let st of (ch.states||[]))for(let sk of (st.skills||[]))all.push({uid:sk.uid,label:`${ch.name} · ${st.name} · ${sk.name}`});
+ }
+ let seen=new Set();
+ return `<option value="">Select skill</option>`+all.filter(x=>x.uid&&!seen.has(x.uid)&&seen.add(x.uid)).map(x=>`<option value="${esc(x.uid)}" ${x.uid===selected?'selected':''}>${esc(x.label)}</option>`).join('');
+}
+function autoUseEditor(skill,c){
+ let a={enabled:false,trigger:'skill',triggerSkill:'',tags:[],tagMode:'any',resource:c.resources?.[0]?.uid||'',threshold:1,timeInterval:10,timeAtStart:false,limitType:'none',maxTriggers:3,windowSeconds:10,resetSkill:'',maxCharges:3,...(skill.autoUse||{})};
+ return `<h3 style="margin-top:16px">Automatic Casting</h3>
+ <div class="item">
+  <label class="check"><input type="checkbox" id="s_canCrit" ${skill.canCrit!==false?'checked':''}> This skill can critically hit <span class="sub">(enabled by default)</span></label>
+  <div class="divider"></div>
+  <label class="check"><input type="checkbox" id="s_auto_enabled" ${a.enabled?'checked':''} onchange="updateAutoUseFields()"> Enable automatic casting</label><div class="sub" style="margin:8px 0">Automatic casts are instant, but still consume the skill’s normal resources and start its normal cooldown. They use the triggering skill’s target when possible.</div>
+  <div id="autoUseConfig" class="${a.enabled?'':'hidden'}" style="margin-top:10px">
+   <label class="check"><input type="checkbox" id="s_auto_exclusive" ${a.exclusive?'checked':''}> Auto Skill Exclusive <span class="sub">(cannot be manually cast)</span></label>
+   <div class="field"><label>Activation Trigger</label><select id="s_auto_trigger" onchange="updateAutoUseFields()">
+    <option value="skill" ${a.trigger==='skill'?'selected':''}>After a specific skill is used</option>
+    <option value="allyTag" ${a.trigger==='allyTag'?'selected':''}>After an ally uses a skill with selected tags</option>
+    <option value="resource" ${a.trigger==='resource'?'selected':''}>When a resource reaches a threshold</option>
+    <option value="time" ${a.trigger==='time'?'selected':''}>Every set time interval</option>
+   </select></div>
+   <div id="autoTriggerSkill" class="${a.trigger==='skill'?'':'hidden'}">
+    <div class="field"><label>Trigger Skill</label><select id="s_auto_triggerSkill">${autoUseSkillOptions(a.triggerSkill)}</select></div>
+   </div>
+   <div id="autoTriggerTags" class="${a.trigger==='allyTag'?'':'hidden'}">
+    <div class="field"><label>Tag Matching</label><select id="s_auto_tagMode"><option value="any" ${a.tagMode!=='all'?'selected':''}>ANY selected tag</option><option value="all" ${a.tagMode==='all'?'selected':''}>ALL selected tags</option></select></div>
+    <label class="sub">Required skill tags</label>${tagPickerField(a.tags||[],'s_auto_tags','Pick Auto Trigger Skill Tags','tags')}
+   </div>
+   <div id="autoTriggerTime" class="${a.trigger==='time'?'':'hidden'}">
+    <div class="field"><label>Repeat every (seconds)</label><input id="s_auto_timeInterval" type="number" min="0.1" step="0.1" value="${safeNumber(a.timeInterval,10)}"></div>
+    <label class="check"><input type="checkbox" id="s_auto_timeAtStart" ${a.timeAtStart?'checked':''}> Also activate immediately at the start of battle</label>
+    <div class="sub">If unchecked, the first cast waits for the full interval. The skill then repeats at each interval.</div>
+   </div>
+   <div id="autoTriggerResource" class="${a.trigger==='resource'?'':'hidden'}">
+    <div class="grid tight"><div class="field"><label>Resource</label><select id="s_auto_resource">${(c.resources||[]).map(r=>`<option value="${r.uid}" ${r.uid===a.resource?'selected':''}>${esc(r.name)}</option>`).join('')}</select></div>
+    <div class="field"><label>Threshold</label><input id="s_auto_threshold" type="number" min="0" value="${safeNumber(a.threshold,1)}"></div></div>
+    <div class="sub">Triggers once when the selected resource reaches or exceeds this amount. It rearms after the resource drops below the threshold.</div>
+   </div>
+   <div class="field" style="margin-top:10px"><label>Trigger Limit</label><select id="s_auto_limit" onchange="updateAutoUseFields()">
+    <option value="none" ${a.limitType==='none'?'selected':''}>Unlimited</option>
+    <option value="window" ${a.limitType==='window'?'selected':''}>Maximum triggers per time window</option>
+    <option value="reset" ${a.limitType==='reset'?'selected':''}>Maximum triggers, reset by a skill</option>
+    <option value="charges" ${a.limitType==='charges'?'selected':''}>Charges, fully restored by a skill</option>
+   </select></div>
+   <div id="autoLimitWindow" class="${a.limitType==='window'?'':'hidden'}">
+    <div class="grid tight"><div class="field"><label>Maximum triggers</label><input id="s_auto_maxWindow" type="number" min="1" step="1" value="${safeNumber(a.maxTriggers,3)}"></div><div class="field"><label>Every X seconds</label><input id="s_auto_window" type="number" min=".1" step=".1" value="${safeNumber(a.windowSeconds,10)}"></div></div>
+   </div>
+   <div id="autoLimitReset" class="${a.limitType==='reset'?'':'hidden'}">
+    <div class="grid tight"><div class="field"><label>Maximum triggers</label><input id="s_auto_maxReset" type="number" min="1" step="1" value="${safeNumber(a.maxTriggers,3)}"></div><div class="field"><label>Reset when this skill is used</label><select id="s_auto_resetSkill">${autoUseSkillOptions(a.resetSkill)}</select></div></div>
+   </div>
+   <div id="autoLimitCharges" class="${a.limitType==='charges'?'':'hidden'}">
+    <div class="grid tight"><div class="field"><label>Maximum charges</label><input id="s_auto_charges" type="number" min="1" step="1" value="${safeNumber(a.maxCharges,3)}"></div><div class="field"><label>Restore when this skill is used</label><select id="s_auto_restoreSkill">${autoUseSkillOptions(a.resetSkill)}</select></div></div>
+   </div>
+  </div>
+ </div>`;
+}
+function updateAutoUseFields(){
+ let enabled=document.getElementById('s_auto_enabled')?.checked;
+ document.getElementById('autoUseConfig')?.classList.toggle('hidden',!enabled);
+ let trigger=document.getElementById('s_auto_trigger')?.value;
+ for(let [id,show] of [['autoTriggerSkill',trigger==='skill'],['autoTriggerTags',trigger==='allyTag'],['autoTriggerResource',trigger==='resource'],['autoTriggerTime',trigger==='time']])document.getElementById(id)?.classList.toggle('hidden',!show);
+ let limit=document.getElementById('s_auto_limit')?.value;
+ for(let [id,show] of [['autoLimitWindow',limit==='window'],['autoLimitReset',limit==='reset'],['autoLimitCharges',limit==='charges']])document.getElementById(id)?.classList.toggle('hidden',!show);
+}
+function updateSkillScalingFields(){let resource=document.getElementById('s_scale')?.value==='resource',mode=document.getElementById('s_resourceScaleMode')?.value||'multiplier';document.getElementById('resourceScalingFields')?.classList.toggle('hidden',!resource);document.getElementById('resourceBaseStatField')?.classList.toggle('hidden',!(resource&&mode==='multiplier'));let mult=document.getElementById('s_mult')?.closest('.field');if(mult)mult.classList.remove('hidden');let label=document.getElementById('s_mult_label');if(label)label.textContent=resource&&mode==='multiplier'?'Damage Multiplier % per stack':'Damage Multiplier % per hit/tick';}
+function skillEditor(cid,sid,stateUid=null){window.currentSkillContext={cid,sid,stateUid};let c=db.characters.find(x=>x.uid===cid),skillList=stateUid?(window.stateSkillDrafts?.[stateUid]||[]):c.skills,s=skillList.find(x=>x.uid===sid)||{uid:uid(),name:'',description:'',tags:[],type:'Regular',mult:100,scale:'atk',defIgnore:0,cast:0,cooldown:0,duration:5,interval:1,target:'Single',hits:1,stun:0,effects:[],buffs:[],canCrit:true,autoUse:{enabled:false}};modal(`<h2>${sid?'Edit':'Create'} Skill</h2><div class="field"><label>Skill Name</label><input id="s_name" value="${esc(s.name)}"></div><div class="field"><label>Skill Description</label><textarea id="s_description" rows="3" placeholder="Describe what this skill does...">${esc(s.description||"")}</textarea></div><h3>Skill Tags</h3><div id="skillTagArea">${tagChecks(s.tags,'skilltags')}</div><div class="grid"><div class="field"><label>Damage Type</label><select id="s_type" onchange="document.getElementById('dotFields').classList.toggle('hidden',this.value!=='DoT')"><option ${s.type==='Regular'?'selected':''}>Regular</option><option ${s.type==='DoT'?'selected':''}>DoT</option></select></div><div class="field"><label>Targeting</label><select id="s_target" onchange="document.getElementById('bounceField').classList.toggle('hidden',this.value!=='Bounce')"><option ${s.target==='Single'?'selected':''}>Single</option><option ${s.target==='Multi'?'selected':''}>Multi</option><option ${s.target==='Bounce'?'selected':''}>Bounce</option></select></div><div class="field"><label id="s_mult_label">${s.scale==='resource'&&s.resourceScaleMode==='multiplier'?'Damage Multiplier % per stack':'Damage Multiplier % per hit/tick'}</label><input id="s_mult" type="number" min="0" value="${s.mult}"></div><div class="field"><label>Scaling Stat</label><select id="s_scale" onchange="updateSkillScalingFields()">${[['atk','ATK'],['maxHp','Max HP'],['def','DEF'],['mastery','Power Mastery'],['resource','Resource']].map(([v,l])=>`<option value="${v}" ${s.scale===v?'selected':''}>${l}</option>`).join('')}</select></div><div id="resourceScalingFields" class="${s.scale==='resource'?'':'hidden'}"><div class="grid tight"><div class="field"><label>Scaling Resource</label><select id="s_scaleResource">${c.resources.map(r=>`<option value="${r.uid}" ${r.uid===(s.scaleResource||c.resources[0]?.uid)?'selected':''}>${esc(r.name)}</option>`).join('')}</select></div><div class="field"><label>Resource Scaling Mode</label><select id="s_resourceScaleMode" onchange="updateSkillScalingFields()"><option value="multiplier" ${(s.resourceScaleMode||'multiplier')==='multiplier'?'selected':''}>Resource Determines Multiplier</option><option value="value" ${s.resourceScaleMode==='value'?'selected':''}>Resource Stacks Become Damage Value</option></select></div><div id="resourceBaseStatField" class="field ${s.scale==='resource'&&(s.resourceScaleMode||'multiplier')==='multiplier'?'':'hidden'}"><label>Damage Stat (multiplier applies to)</label><select id="s_resourceBaseStat">${[['atk','ATK'],['maxHp','Max HP'],['def','DEF'],['mastery','Power Mastery']].map(([v,l])=>`<option value="${v}" ${(s.resourceBaseStat||'atk')===v?'selected':''}>${l}</option>`).join('')}</select></div></div></div><div class="field"><label>Skill DEF Ignore %</label><input id="s_di" type="number" value="${s.defIgnore}"></div><div class="field"><label>Stun Damage</label><input id="s_stun" type="number" min="0" value="${s.stun}"></div><div class="field"><label>Cast Time (seconds)</label><input id="s_cast" type="number" min="0" step=".1" value="${s.cast}"></div><div class="field"><label>Cooldown (seconds)</label><input id="s_cd" type="number" min="0" step=".1" value="${s.cooldown}"></div></div><div id="dotFields" class="${s.type==='DoT'?'':'hidden'}"><h3>DoT settings</h3><div class="grid"><div class="field"><label>Duration (seconds)</label><input id="s_duration" type="number" min=".1" step=".1" value="${s.duration}"></div><div class="field"><label>Hit interval (seconds)</label><input id="s_interval" type="number" min=".1" step=".1" value="${s.interval}"></div></div></div><div id="bounceField" class="${s.target==='Bounce'?'':'hidden'}"><div class="field"><label>Number of bounce hits</label><input id="s_hits" type="number" min="1" value="${s.hits}"></div></div>${autoUseEditor(s,c)}<h3>Resource effects</h3><div id="resourceEffects">${effectRows(s.effects,c.resources)}</div><button class="secondary small" onclick="addEffectRow('${cid}')">+ Resource effect</button><h3 style="margin-top:14px">Enhancing abilities</h3><div id="buffRows">${buffRows(s.buffs)}</div><button class="secondary small" onclick="addBuffRow()">+ Add buff</button><div class="row" style="justify-content:flex-end;margin-top:18px"><button class="secondary" onclick="${stateUid?`manageStateSkills('${cid}','${stateUid}')`:`manageSkills('${cid}')`}">Cancel</button><button onclick="saveSkill('${cid}','${s.uid}',${!sid},${stateUid?`'${stateUid}'`:'null'})">Save Skill</button></div>`)}
+function effectRows(effects,resources){return effects.map(e=>`<div class="item effectRow"><div class="grid tight"><div class="field"><label>Resource</label><select class="e_resource">${resources.map(r=>`<option value="${r.uid}" ${r.uid===e.resource?'selected':''}>${esc(r.name)}</option>`).join('')}</select></div><div class="field"><label>Action</label><select class="e_action" onchange="toggleEffectConsume(this)"><option ${e.action==='Gain'?'selected':''}>Gain</option><option ${e.action==='Consume'?'selected':''}>Consume</option></select></div><div class="field e_fixedWrap ${e.consumeMode==='all'?'hidden':''}"><label>Amount</label><input class="e_amount" type="number" min="0" value="${e.amount??1}"></div><div class="field e_consumeModeWrap ${e.action==='Consume'?'':'hidden'}"><label>Consume Mode</label><select class="e_consumeMode" onchange="toggleEffectConsume(this)"><option value="fixed" ${(e.consumeMode||'fixed')==='fixed'?'selected':''}>Fixed Amount</option><option value="all" ${e.consumeMode==='all'?'selected':''}>Consume All Stacks</option></select></div></div><div class="grid tight e_consumeLimits ${e.action==='Consume'&&e.consumeMode==='all'?'':'hidden'}"><div class="field"><label>Minimum stacks (optional)</label><input class="e_min" type="number" min="0" value="${e.minStacks??''}" placeholder="No minimum"></div><div class="field"><label>Maximum stacks (optional)</label><input class="e_max" type="number" min="0" value="${e.maxStacks??''}" placeholder="No maximum"></div></div><button class="danger small" onclick="this.parentElement.remove()">Remove</button></div>`).join('')}
+function toggleEffectConsume(el){let row=el.closest('.effectRow');if(!row)return;let action=row.querySelector('.e_action').value,mode=row.querySelector('.e_consumeMode')?.value||'fixed';row.querySelector('.e_consumeModeWrap').classList.toggle('hidden',action!=='Consume');row.querySelector('.e_fixedWrap').classList.toggle('hidden',action==='Consume'&&mode==='all');row.querySelector('.e_consumeLimits').classList.toggle('hidden',!(action==='Consume'&&mode==='all'));}
+function addEffectRow(cid){let c=db.characters.find(x=>x.uid===cid);if(!c.resources.length)return toast('Create character resources first.');let d=document.createElement('div');d.innerHTML=effectRows([{resource:c.resources[0].uid,amount:1,action:'Gain'}],c.resources);document.getElementById('resourceEffects').append(d.firstElementChild)}
+function mindBuffEffectOptions(selected=''){let opts=['ATK','Max HP','DEF','Crit Rate','Crit DMG','Power Mastery','Main Energy','DEF Ignore','Pure Buff'].map(x=>`<option value="${x}" ${selected===x?'selected':''}>${x}</option>`).join('');let tags=mindEligibleTags().filter(x=>mindTagSetting(x.type,x.tag).enabled);if(tags.length)opts+=`<optgroup label="Mind Tag Damage Bonus">${tags.map(x=>{let v=`MindTag|${x.type}|${x.tag}`;return `<option value="${esc(v)}" ${selected===v?'selected':''}>${x.type[0].toUpperCase()+x.type.slice(1)}: ${esc(x.tag)}</option>`}).join('')}</optgroup>`;return opts}
+function buffRows(bs){return bs.map((b,i)=>`<div class="item buffRow" data-id="${b.uid}"><div class="grid tight"><div class="field"><label>Category</label><select class="b_cat"><option ${b.category==='Self'?'selected':''}>Self</option><option ${b.category==='Selected Character'?'selected':''}>Selected Character</option><option ${b.category==='Teamwide'?'selected':''}>Teamwide</option></select></div><div class="field"><label>Effect</label><select class="b_effect">${mindBuffEffectOptions(b.effect)}</select></div><div class="field"><label>Amount (%)</label><input class="b_amount" type="number" value="${b.amount}"></div><div class="field"><label>Value type</label><select class="b_unit"><option value="flat" ${b.unit==='flat'?'selected':''}>Flat</option><option value="percent" ${b.unit==='percent'?'selected':''}>Percentage</option></select></div><div class="field"><label>Duration (seconds)</label><input class="b_duration" type="number" min="0" step=".1" value="${b.duration}"></div><div class="field"><label>Stacking</label><select class="b_stack"><option ${b.stack==='Stack'?'selected':''}>Stack</option><option ${b.stack==='Refresh'?'selected':''}>Refresh</option></select></div></div><label class="sub">Supported tags (no tags = affects nothing)</label>${tagPickerField(b.tags||[],`b_tags_${b.uid||i}`,'Pick Supported Skill Tags','tags').replace(`id="b_tags_${b.uid||i}"`,`id="b_tags_${b.uid||i}" class="b_tags"`) }<button class="danger small" onclick="this.parentElement.remove()">Remove buff</button></div>`).join('')}
+function addBuffRow(){let d=document.createElement('div');d.innerHTML=buffRows([{uid:uid(),category:'Self',effect:'ATK',amount:10,unit:'flat',duration:10,stack:'Stack',tags:[]}]);document.getElementById('buffRows').append(d.firstElementChild)}
+function saveSkill(cid,sid,isNew,stateUid=null){let c=db.characters.find(x=>x.uid===cid),skillList=stateUid?(window.stateSkillDrafts[stateUid]||(window.stateSkillDrafts[stateUid]=[])):c.skills;let tags=JSON.parse(document.getElementById('skilltags').value||'[]');let type=document.getElementById('s_type').value,target=document.getElementById('s_target').value;let effects=[...document.querySelectorAll('.effectRow')].map(r=>({resource:r.querySelector('.e_resource').value,amount:Math.max(0,num(r.querySelector('.e_amount')?.value)),action:r.querySelector('.e_action').value,consumeMode:r.querySelector('.e_consumeMode')?.value||'fixed',minStacks:r.querySelector('.e_min')?.value===''?null:Math.max(0,num(r.querySelector('.e_min')?.value)),maxStacks:r.querySelector('.e_max')?.value===''?null:Math.max(0,num(r.querySelector('.e_max')?.value))}));let buffs=[...document.querySelectorAll('.buffRow')].map(r=>({uid:r.dataset.id,category:r.querySelector('.b_cat').value,effect:r.querySelector('.b_effect').value,amount:num(r.querySelector('.b_amount').value),unit:r.querySelector('.b_effect').value==='Pure Buff'?'percent':r.querySelector('.b_unit').value,duration:Math.max(0,num(r.querySelector('.b_duration').value)),stack:r.querySelector('.b_stack').value,tags:JSON.parse(r.querySelector('.b_tags').value||'[]')}));let trigger=document.getElementById('s_auto_trigger')?.value||'skill',limitType=document.getElementById('s_auto_limit')?.value||'none';
+let autoUse={enabled:!!document.getElementById('s_auto_enabled')?.checked,exclusive:!!document.getElementById('s_auto_exclusive')?.checked,trigger,triggerSkill:document.getElementById('s_auto_triggerSkill')?.value||'',tags:JSON.parse(document.getElementById('s_auto_tags')?.value||'[]'),tagMode:document.getElementById('s_auto_tagMode')?.value||'any',resource:document.getElementById('s_auto_resource')?.value||'',threshold:Math.max(0,num(document.getElementById('s_auto_threshold')?.value,1)),timeInterval:Math.max(.1,num(document.getElementById('s_auto_timeInterval')?.value,10)),timeAtStart:!!document.getElementById('s_auto_timeAtStart')?.checked,limitType,maxTriggers:Math.max(1,Math.floor(num((limitType==='reset'?document.getElementById('s_auto_maxReset'):document.getElementById('s_auto_maxWindow'))?.value,3))),windowSeconds:Math.max(.1,num(document.getElementById('s_auto_window')?.value,10)),resetSkill:document.getElementById('s_auto_resetSkill')?.value||document.getElementById('s_auto_restoreSkill')?.value||'',maxCharges:Math.max(1,Math.floor(num(document.getElementById('s_auto_charges')?.value,3)))};
+let s={uid:sid,name:document.getElementById('s_name').value.trim(),description:document.getElementById('s_description').value.trim(),tags,type,target,canCrit:document.getElementById('s_canCrit')?.checked!==false,autoUse,mult:Math.max(0,num(document.getElementById('s_mult').value)),scale:document.getElementById('s_scale').value,scaleResource:document.getElementById('s_scaleResource')?.value||'',resourceScaleMode:document.getElementById('s_resourceScaleMode')?.value||'multiplier',resourceBaseStat:document.getElementById('s_resourceBaseStat')?.value||'atk',defIgnore:num(document.getElementById('s_di').value),stun:Math.max(0,num(document.getElementById('s_stun').value)),cast:Math.max(0,num(document.getElementById('s_cast').value)),cooldown:Math.max(0,num(document.getElementById('s_cd').value)),duration:Math.max(.1,num(document.getElementById('s_duration')?.value,5)),interval:Math.max(.1,num(document.getElementById('s_interval')?.value,1)),hits:Math.max(1,Math.floor(num(document.getElementById('s_hits')?.value,1))),effects,buffs};if(!s.name)return toast('Skill name is required.');if(isNew)skillList.push(s);else Object.assign(skillList.find(x=>x.uid===sid),s);if(stateUid){manageStateSkills(cid,stateUid);let label=document.querySelector(`[data-state-skills="${stateUid}"]`);if(label)label.textContent=skillList.length+' enhanced skill(s) configured';}else{save();manageSkills(cid);}toast('Skill saved.')}
+
+function manageStateSkills(cid,stateUid){
+ if(!window.stateEditorSnapshot){let root=document.getElementById('modalContent');window.stateEditorSnapshot={html:root.innerHTML,controls:[...root.querySelectorAll('input,select,textarea')].map(x=>({value:x.value,checked:x.checked}))};}
+ let c=db.characters.find(x=>x.uid===cid),st=(c?.states||[]).find(x=>x.uid===stateUid);
+ let skills=window.stateSkillDrafts?.[stateUid]||st?.skills||[];
+ window.stateSkillDrafts=window.stateSkillDrafts||{};window.stateSkillDrafts[stateUid]=skills;
+ modal(`<div class="between"><div><h2>${esc(st?.name||'Enhanced State')} · Skills</h2><div class="sub">This complete skill set is used instead of normal skills while the state is active.</div></div><button onclick="skillEditor('${cid}',null,'${stateUid}')">+ Skill</button></div><div class="list" style="margin-top:12px">${skills.map(sk=>`<div class="item"><div class="between"><div><b>${esc(sk.name)}</b><div>${(sk.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div><div class="sub">${esc(sk.description||'No description')}</div><div class="sub">${esc(sk.type)} · ${esc(sk.target)} · ${fmt(sk.mult)}%</div>${skillEstimateHTML(sk,c)}</div><div class="row"><button class="secondary small" onclick="skillEditor('${cid}','${sk.uid}','${stateUid}')">Edit</button><button class="danger small" onclick="deleteStateSkill('${cid}','${stateUid}','${sk.uid}')">Delete</button></div></div></div>`).join('')||"<p class='sub'>No enhanced skills yet. Add skills to define this state's skill set.</p>"}</div><div class="row" style="justify-content:flex-end;margin-top:14px"><button class="secondary" onclick="returnToStateEditor()">Done</button></div>`);
+}
+function returnToStateEditor(){let snap=window.stateEditorSnapshot;if(!snap)return closeModal();let root=document.getElementById('modalContent');root.innerHTML=snap.html;let controls=[...root.querySelectorAll('input,select,textarea')];controls.forEach((x,i)=>{let v=snap.controls[i];if(!v)return;x.value=v.value;if(x.type==='checkbox'||x.type==='radio')x.checked=v.checked;});window.stateEditorSnapshot=null;for(let [id,skills] of Object.entries(window.stateSkillDrafts||{})){let label=root.querySelector(`[data-state-skills="${id}"]`);if(label)label.textContent=skills.length+' enhanced skill(s) configured';}root.querySelectorAll('.stateRow .st_method').forEach(toggleStateFields);}
+function deleteStateSkill(cid,stateUid,sid){confirmBox('Delete this enhanced skill?',()=>{window.stateSkillDrafts[stateUid]=(window.stateSkillDrafts[stateUid]||[]).filter(x=>x.uid!==sid);manageStateSkills(cid,stateUid);});}
+
+function deleteSkill(cid,sid){confirmBox('Delete this skill?',()=>{let c=db.characters.find(x=>x.uid===cid);c.skills=c.skills.filter(s=>s.uid!==sid);save();manageSkills(cid)})}
+function renderEnemies(){let el=document.getElementById('enemyList');el.innerHTML=db.enemies.length?db.enemies.map(e=>`<div class="item"><div class="between"><div><b>${esc(e.name)}</b> <span class="tag">${esc(e.id)}</span><div class="sub">HP ${e.hp} · Stun ${e.stun} · DEF ${e.def}% / stunned ${e.stunnedDef}% · Essence ${e.essenceDrop||0}</div></div><div class="row"><button class="secondary small" onclick="editEnemy('${e.uid}')">Edit</button><button class="danger small" onclick="deleteEnemy('${e.uid}')">Delete</button></div></div></div>`).join(''):'<p class="sub">No enemies created yet.</p>'}
+function newEnemy(){editEnemy(null)}
+function editEnemy(id){let e=db.enemies.find(x=>x.uid===id)||{uid:uid(),id:'',name:'',hp:10000,stun:100,stunDuration:5,def:0,stunnedDef:-40};let isNew=!id;modal(`<h2>${isNew?'Create':'Edit'} Enemy</h2><div class="grid"><div class="field"><label>Enemy ID (#001)</label><input id="e_id" value="${esc(e.id)}"></div><div class="field"><label>Enemy Name</label><input id="e_name" value="${esc(e.name)}"></div><div class="field"><label>Maximum HP</label><input id="e_hp" type="number" min="1" value="${e.hp}"></div><div class="field"><label>Maximum Stun Meter</label><input id="e_stun" type="number" min="1" value="${e.stun}"></div><div class="field"><label>Stun Duration (seconds)</label><input id="e_duration" type="number" min="0" step=".1" value="${e.stunDuration}"></div><div class="field"><label>Normal DEF % (negative allowed)</label><input id="e_def" type="number" value="${e.def}"></div><div class="field"><label>Stunned DEF % (negative allowed)</label><input id="e_sdef" type="number" value="${e.stunnedDef}"></div><div class="field"><label>Relic Essence Drop</label><input id="e_essence" type="number" min="0" step="1" value="${e.essenceDrop||0}"></div></div><div class="row" style="justify-content:flex-end"><button class="secondary" onclick="closeModal()">Cancel</button><button onclick="saveEnemy('${e.uid}',${isNew})">Save Enemy</button></div>`)}
+function saveEnemy(uid0,isNew){let id=document.getElementById('e_id').value.trim(),name=document.getElementById('e_name').value.trim();if(!/^#\d+$/.test(id)||!name)return toast('Enter a valid ID and name.');if(db.enemies.some(e=>e.id===id&&e.uid!==uid0))return toast('Enemy ID already exists.');let e={uid:uid0,id,name,hp:Math.max(1,num(document.getElementById('e_hp').value)),stun:Math.max(1,num(document.getElementById('e_stun').value)),stunDuration:Math.max(0,num(document.getElementById('e_duration').value)),def:num(document.getElementById('e_def').value),stunnedDef:num(document.getElementById('e_sdef').value),essenceDrop:Math.max(0,Math.floor(num(document.getElementById('e_essence').value)))};if(isNew)db.enemies.push(e);else Object.assign(db.enemies.find(x=>x.uid===uid0),e);save();closeModal();renderAll()}
+function deleteEnemy(id){let e=db.enemies.find(x=>x.uid===id);confirmBox(`Delete ${e.name}?`,()=>{db.enemies=db.enemies.filter(x=>x.uid!==id);save();renderAll()})}
+function tagPickerField(selected,inputId,title,key='tags'){
+ let values=Array.isArray(selected)?selected:(selected?[selected]:[]);
+ let summary=values.length?values.join(', '):'None selected';
+ return `<input type="hidden" id="${inputId}" value="${esc(JSON.stringify(values))}"><div class="row" style="align-items:center"><button type="button" class="secondary small" onclick="openTagPicker('${inputId}','${esc(title)}','${key}')">Pick Tags</button><span class="sub" id="${inputId}_summary">${esc(summary)}</span></div>`;
+}
+function openTagPicker(inputId,title,key='tags'){
+ let source=key==='factionTags'?db.factionTags:key==='elementTags'?db.elementTags:db.tags;
+ let input=document.getElementById(inputId),selected=[];try{selected=JSON.parse(input?.value||'[]')}catch{}
+ let root=document.getElementById('modalContent');
+ window.tagPickerReturn={html:root.innerHTML,controls:[...root.querySelectorAll('input,select,textarea')].map(x=>({value:x.value,checked:x.checked,selected:[...x.options||[]].map(o=>o.selected)})),inputId};
+ modal(`<h2>${esc(title)}</h2><div class="sub">Choose the tags you want, then press Save.</div><div class="checks" style="margin-top:12px">${source.map(t=>`<label class="check"><input type="checkbox" class="tagPickerChoice" value="${esc(t)}" ${selected.includes(t)?'checked':''}>${esc(t)}</label>`).join('')||'<span class="sub">No tags have been created in Settings yet.</span>'}</div><div class="row" style="justify-content:flex-end;margin-top:16px"><button class="secondary" onclick="cancelTagPicker()">Cancel</button><button onclick="saveTagPicker('${inputId}')">Save</button></div>`);
+}
+function restoreTagPicker(values=null){
+ let snap=window.tagPickerReturn;if(!snap)return;
+ let root=document.getElementById('modalContent');root.innerHTML=snap.html;
+ let controls=[...root.querySelectorAll('input,select,textarea')];
+ controls.forEach((x,i)=>{let v=snap.controls[i];if(!v)return;x.value=v.value;if('checked'in x)x.checked=v.checked;if(x.options)v.selected.forEach((sel,j)=>{if(x.options[j])x.options[j].selected=sel})});
+ let input=document.getElementById(snap.inputId);
+ if(input&&values){input.value=JSON.stringify(values);let summary=document.getElementById(snap.inputId+'_summary');if(summary)summary.textContent=values.length?values.join(', '):'None selected'}
+ window.tagPickerReturn=null;
+}
+function cancelTagPicker(){restoreTagPicker();document.getElementById('modal').classList.remove('hidden')}
+function saveTagPicker(inputId){
+ let values=[...document.querySelectorAll('.tagPickerChoice:checked')].map(x=>x.value);
+ restoreTagPicker(values);document.getElementById('modal').classList.remove('hidden');
+}
+function tagSummary(values,fallback){let a=Array.isArray(values)?values:(values?[values]:[]);return a.length?a.join(', '):fallback}
+function addTaxonomyTag(key,inputId){let input=document.getElementById(inputId),v=input?.value.trim();if(!v)return toast('Enter a tag name first.');db[key]=Array.isArray(db[key])?db[key]:[];if(db[key].includes(v))return toast('That tag already exists.');db[key].push(v);save();renderTaxonomyTags(key);input.value='';toast('Tag saved.')}
+function renderTaxonomyTags(key){renderMindTagSettings();}function removeTaxonomyTag(key,t){confirmBox(`Remove "${t}" from the ${key==='factionTags'?'faction':'element'} tag list? Existing character assignments are retained.`,()=>{db[key]=db[key].filter(x=>x!==t);save();renderTaxonomyTags(key)})}
+function addTag(){let input=document.getElementById('newTag'),v=input?.value.trim();if(!v)return toast('Enter a skill tag name first.');if(db.tags.includes(v))return toast('That skill tag already exists.');db.tags.push(v);save();renderTags();input.value='';toast('Skill tag saved.')}
+function renderTags(){renderMindTagSettings();}function removeTag(t){confirmBox(`Remove tag "${t}" from the global tag list? Existing assignments are retained.`,()=>{db.tags=db.tags.filter(x=>x!==t);save();renderTags()})}
+function renderSetup(){document.getElementById('charSlots').innerHTML=[0,1,2].map(i=>`<div class="field"><label>Character slot ${i+1}</label><input id="cs${i}" placeholder="#001" list="charIds"><div class="sub" id="cv${i}"></div></div>`).join('')+'<datalist id="charIds">'+db.characters.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('')+'</datalist>';document.getElementById('enemySlots').innerHTML=[0,1,2,3,4].map(i=>`<div class="field"><label>Enemy slot ${i+1}</label><input id="es${i}" placeholder="#001" list="enemyIds"></div>`).join('')+'<datalist id="enemyIds">'+db.enemies.map(e=>`<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('')+'</datalist>';[0,1,2].forEach(i=>document.getElementById('cs'+i).oninput=()=>{let c=db.characters.find(x=>x.id===document.getElementById('cs'+i).value.trim());document.getElementById('cv'+i).textContent=c?c.name:' '})}
+function startBattle(){let chars=[0,1,2].map(i=>document.getElementById('cs'+i).value.trim()).filter(Boolean);let enemies=[0,1,2,3,4].map(i=>document.getElementById('es'+i).value.trim()).filter(Boolean);let err=[];if(!chars.length)err.push('Select at least one character.');if(new Set(chars).size!==chars.length)err.push('Character slots must be unique.');chars.forEach(id=>{if(!db.characters.some(c=>c.id===id))err.push(`Character ${id} does not exist.`)});enemies.forEach(id=>{if(!db.enemies.some(e=>e.id===id))err.push(`Enemy ${id} does not exist.`)});if(!enemies.length)err.push('Select at least one enemy.');let limit=document.getElementById('timeLimit').value;document.getElementById('setupError').textContent=err.join(' ');if(err.length)return;battle={time:0,stateActivationCounter:0,limit:limit===''?null:Math.max(0,num(limit)),ended:false,chars:chars.map(id=>{let c=db.characters.find(x=>x.id===id);return {uid:c.uid,id:c.id,name:c.name,faction:Array.isArray(c.faction)?[...c.faction]:(c.faction?[c.faction]:[]),element:Array.isArray(c.element)?[...c.element]:(c.element?[c.element]:[]),stats:{atk:100,maxHp:1000,def:0,mastery:0,critRate:5,critDmg:50,...c.stats},display:[...(c.display||[])],resources:(c.resources||[]).map(r=>({...r,current:0})),mainEnergy:c.mainEnergy,passives:JSON.parse(JSON.stringify(c.passives||[])),states:JSON.parse(JSON.stringify(c.states||[])).map(st=>({...st,active:false,remaining:0,activationOrder:0})),skills:JSON.parse(JSON.stringify(c.skills||[])).map(sk=>({description:'',mult:100,scale:'atk',defIgnore:0,stun:0,cast:0,cooldown:0,type:'Regular',target:'Single',hits:1,duration:5,interval:1,effects:[],buffs:[],tags:[],...sk})),cooldowns:{},buffs:[],dots:[],damage:0,cast:0,skillDamage:{}}}),enemies:enemies.map((id,i)=>{let e=db.enemies.find(x=>x.id===id);return {...e,hp:Math.max(1,safeNumber(e.hp,10000)),stun:Math.max(1,safeNumber(e.stun,100)),stunDuration:Math.max(0,safeNumber(e.stunDuration,5)),def:safeNumber(e.def,0),stunnedDef:safeNumber(e.stunnedDef,-40),instance:uid(),currentHp:Math.max(1,safeNumber(e.hp,10000)),currentStun:Math.max(1,safeNumber(e.stun,100)),stunned:false,stunLeft:0,dead:false,essenceAwarded:false}}),totalEnemyHp:enemies.reduce((sum,id)=>sum+Math.max(1,safeNumber(db.enemies.find(e=>e.id===id)?.hp,10000)),0),log:[],floatEvents:[],damageBatchCounter:0,activeDamageBatch:null,autoUseState:{},finishing:false,finishReason:null};document.getElementById('setup').classList.add('hidden');document.getElementById('results').classList.add('hidden');document.getElementById('combat').classList.remove('hidden');renderCombat();log('Battle started.');initializeTimeAutoSkills();renderCombat()}
+function log(s){if(!battle)return;battle.log.unshift(`[${battle.time.toFixed(2)}s] ${s}`);battle.log=battle.log.slice(0,80);document.getElementById('combatLog').innerHTML=battle.log.map(x=>`<div class="item sub">${esc(x)}</div>`).join('')}
+function clearLog(){battle.log=[];document.getElementById('combatLog').innerHTML=''}
+function fmt(n){return Number(n).toLocaleString(undefined,{maximumFractionDigits:2})}
+function relicStatContribution(c,key){
+ let totals=relicStatTotals(c.uid);
+ if(key==='energyRegen')return safeNumber(totals.flat.energyRegen);
+ let raw=safeNumber(c.stats[key]);
+ return safeNumber(totals.flat[key])+(raw+safeNumber(totals.mainFlat[key]))*safeNumber(totals.percent[key])/100;
+}
+function liveStats(c){let st={...c.stats};let relicTotals=relicStatTotals(c.uid);st.energyRegen=safeNumber(st.energyRegen,100)+safeNumber(relicTotals.flat.energyRegen);for(let key of ['atk','maxHp','def','mastery','critRate','critDmg']){let raw=safeNumber(c.stats[key]);let percentBasis=raw+safeNumber(relicTotals.mainFlat[key]);st[key]=raw+safeNumber(relicTotals.flat[key])+percentBasis*safeNumber(relicTotals.percent[key])/100;}for(let state of activeState(c)){for(let k of ['atk','maxHp','def','mastery','critRate','critDmg'])st[k]=safeNumber(st[k])+safeNumber(state.statMods?.[k]);}for(let b of (c.buffs||[])){let key=({'ATK':'atk','Max HP':'maxHp',DEF:'def','Crit Rate':'critRate','Crit DMG':'critDmg','Power Mastery':'mastery'})[b.effect];if(key)st[key]=safeNumber(st[key])+safeNumber(b.value,b.amount)}return st}
+function buffTrackerHTML(c){if(!c.buffs?.length)return '<div class="sub">No active buffs.</div>';return `<div class="buff-tracker">${c.buffs.map(b=>`<div class="buff-entry"><div class="between"><b>${esc(String(b.effect||'').startsWith('MindTag|')?`${({skill:'Skill',faction:'Faction',element:'Element'})[b.mindTagType]||'Tag'} Tag Bonus (${b.mindTag})`:b.effect)}</b><span class="buff-time">${fmt(Math.max(0,b.left))}s left</span></div><div class="stat">${b.value>=0?'+':''}${fmt(safeNumber(b.value,b.amount))} ${(b.effect==='Pure Buff'||String(b.effect||'').startsWith('MindTag|'))?'% damage bonus':b.effect==='Crit Rate'||b.effect==='Crit DMG'?'percentage points':b.unit==='percent'?'(snapshotted %)':'flat'}</div><div>${(b.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')||'<span class="sub">No tags</span>'}</div><div class="buff-meter"><i style="width:${Math.max(0,Math.min(100,b.duration>0?b.left/b.duration*100:0))}%"></i></div></div>`).join('')}</div>`}
+function renderCombat(showFloats=true){if(!battle)return;let finishBtn=document.getElementById('finishBattleBtn');if(finishBtn)finishBtn.classList.toggle('hidden',!battle.finishing);let essenceLabel=document.getElementById('combatEssence');if(essenceLabel)essenceLabel.textContent='Relic Essence: '+db.relicEssence;document.getElementById('clockLabel').textContent='Combat time: '+battle.time.toFixed(2)+'s';document.getElementById('timerLabel').textContent=battle.limit===null?'∞ Unlimited':fmt(Math.max(0,battle.limit-battle.time))+'s remaining';document.getElementById('combatEnemies').innerHTML=battle.enemies.map((e,i)=>{let hp=Math.max(0,e.currentHp)/e.hp*100,st=e.currentStun/e.stun*100,dots=battle.chars.flatMap(owner=>owner.dots.filter(d=>d.target===e.instance&&d.remaining>0).map(d=>({d,owner})));return `<div data-enemy-instance="${e.instance}" class="enemy-card ${e.dead?'dead':''} ${e.stunned?'stunned':''}"><div class="between"><b>${esc(e.name)}</b><span class="tag">${esc(e.id)}</span></div><div class="meter">${e.dead?'DEFEATED':e.stunned?'STUNNED · '+e.stunLeft.toFixed(1)+'s':'Alive'}</div><div class="stat">HP ${fmt(e.currentHp)} / ${fmt(e.hp)}</div><div class="bar"><i style="width:${hp}%"></i></div><div class="stat">Stun ${fmt(e.currentStun)} / ${fmt(e.stun)}</div><div class="bar stun"><i style="width:${st}%"></i></div><div class="meter">DEF: ${e.stunned?e.stunnedDef:e.def}%</div>${dots.length?`<div class="enemy-dots"><div class="sub"><b>Active DoT Effects</b></div>${dots.map(({d,owner})=>`<div class="dot-entry"><div class="between"><b>${esc(d.skillName||d.skill||'DoT Skill')}</b><span class="dot-count">${d.remaining} left</span></div><div class="sub">Applied by ${esc(owner.name)} · ${fmt(d.base)} base damage per trigger</div></div>`).join('')}</div>`:''}</div>`}).join('');document.getElementById('combatParty').innerHTML=battle.chars.map((c,i)=>{let live=liveStats(c);return `<div class="party-card"><div class="between"><b>${esc(c.name)}${activeState(c).length?`(<span style="color:#8b5cf6">${activeState(c).map(st=>esc(st.name)).join(", ")}</span>)`:``}</b><span class="tag">${esc(c.id)}</span></div><div class="stat live-stat-list">${c.display.map(k=>{let base=safeNumber(c.stats[k]),current=safeNumber(live[k],base),delta=current-base-relicStatContribution(c,k);return `<div><b>${({atk:'ATK',maxHp:'Max HP',def:'DEF',mastery:'Power Mastery',critRate:'Crit Rate',critDmg:'Crit DMG',energyRegen:'Energy Regeneration'})[k]}:</b> ${fmt(current)}${['critRate','critDmg','energyRegen'].includes(k)?'%':''}${Math.abs(delta)>1e-8?` <span class="buff-delta">(${delta>0?'+':''}${fmt(delta)})</span>`:''}</div>`}).join('')}</div>${combatRelicHTML(c)}<details class="buff-details"><summary>Active Buffs (${c.buffs.length})</summary>${buffTrackerHTML(c)}</details><div style="margin:7px 0">${c.resources.map(r=>`<div class="stat">${esc(r.name)}: ${fmt(r.current)}${r.max===null?'':' / '+r.max}</div>`).join('')}</div><div class="stat">Damage: <b>${fmt(c.damage)}</b></div><div class="state-status">${(c.states||[]).map(st=>`<div class="sub">${st.active?`<b>${esc(st.name)}</b> · Active${st.duration>0?` · ${fmt(st.remaining)}s`:``}`:`${esc(st.name)} · Inactive`}</div>${!st.active&&['manual','consume'].includes(st.method)?`<button class="secondary small" style="margin:3px 0" onclick="manualState(${i},'${st.uid}')" ${battle.finishing?'disabled':''}>Activate ${esc(st.name)}</button>`:''}`).join('')}</div><div class="sub">Skill set: <b>${esc(activeState(c).slice(-1)[0]?.name||'Normal')}</b></div><button class="skillbtn" ${battle.finishing?'disabled':''} onclick="openSkills(${i})">Choose Skill</button></div>`}).join('');document.getElementById('combatLog').innerHTML=battle.log.map(x=>`<div class="item sub">${esc(x)}</div>`).join('');if(showFloats)showDamagePopups(2000)}
+function showCombatCharacterTab(tab,button){document.getElementById('combatSkillsPanel').classList.toggle('hidden',tab!=='skills');document.getElementById('combatDetailsPanel').classList.toggle('hidden',tab!=='details');button.parentElement.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b===button))}
+function openSkills(i){
+ let c=battle.chars[i],skillSet=availableSkills(c),currentState=activeState(c).slice(-1)[0]||null;
+ let statFields=[['atk','ATK'],['maxHp','Max HP'],['def','DEF'],['mastery','Power Mastery'],['critRate','Crit Rate'],['critDmg','Crit DMG']];
+ let currentStats=typeof liveStats==='function'?liveStats(c):c.stats;
+ let profileStatFields=[...statFields.filter(([k])=>k!=='energyRegen'),['energyRegen','Energy Regeneration %']];let profileStats=profileStatFields.map(([k,label])=>`<div class="item" style="padding:7px"><div class="sub">${label}</div><b>${fmt(c.stats[k])}${['critRate','critDmg','energyRegen'].includes(k)?'%':''}</b>${Math.abs(safeNumber(currentStats[k])-safeNumber(c.stats[k]))>1e-8?`<div class="sub">Current: ${fmt(currentStats[k])}${['critRate','critDmg','energyRegen'].includes(k)?'%':''}</div>`:''}</div>`).join('');let mindStat=mindTagStat(c);if(mindStat)profileStats+=`<div class="item" style="padding:7px"><div class="sub">${esc(mindStat.label)}</div><b>+${fmt(mindStat.value)}%</b></div>`;
+ let passives=(c.passives||[]).map(p=>`<div class="item" style="padding:8px"><b>${esc(p.name||'Passive')}</b><div class="sub">${p.scope==='all'?'Includes owner':'Other characters'} · ${p.mode==='all'?'All tags':'Any tag'}: ${(p.tags||[]).map(esc).join(', ')||'No tags'}</div><div class="sub">Owner gains ${fmt(p.amount)} ${esc(c.resources.find(r=>r.uid===p.resource)?.name||'resource')}</div></div>`).join('')||'<div class="sub">No passive rules.</div>';
+ let buffs=(c.buffs||[]).map(b=>`<div class="sub">${esc(b.effect)} · ${fmt(b.value)}${b.unit==='percent'?'%':''} · ${b.left.toFixed(1)}s left · ${(b.tags||[]).map(esc).join(', ')}</div>`).join('')||'<div class="sub">No active buffs.</div>';
+ let skillCards=skillSet.map(s=>{
+  let viewSkill=effectiveSkill(c,s);let cd=c.cooldowns[s.uid]||0;
+  let consumes=s.effects.filter(e=>e.action==='Consume').map(e=>{let r=c.resources.find(x=>x.uid===e.resource);return `${e.consumeMode==='all'?'All stacks'+(e.minStacks!=null?' (min '+fmt(e.minStacks)+')':'')+(e.maxStacks!=null?' (max '+fmt(e.maxStacks)+')':''):fmt(e.amount)} ${esc(r?.name||'resource')}`});
+  let restores=s.effects.filter(e=>e.action!=='Consume').map(e=>{let r=c.resources.find(x=>x.uid===e.resource);return `+${fmt(e.amount)} ${esc(r?.name||'resource')}`});
+  let need=s.effects.filter(e=>e.action==='Consume').some(e=>{let r=c.resources.find(x=>x.uid===e.resource);return !r||r.current<(e.consumeMode==='all'?safeNumber(e.minStacks,0):safeNumber(e.amount))});
+  let status=cd>0?`Cooldown · ${cd.toFixed(1)}s remaining`:need?'Unavailable · insufficient resources':'Ready';
+  return `<div class="item"><div class="between"><b>${esc(s.name)}</b><span class="tag">${status}</span></div><div>${(s.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div><div class="sub" style="margin-top:5px">${esc(s.description||'No description')}</div><div class="sub">${esc(s.type)} · ${fmt(viewSkill.mult)}% ${esc(s.scale||'ATK')} · ${esc(s.target)} · Cast ${fmt(viewSkill.cast)}s · Cooldown ${fmt(viewSkill.cooldown)}s</div><div class="sub">Resource cost: ${consumes.join(', ')||'None'}${restores.length?' · Restores: '+restores.join(', '):''}</div>${(s.buffs||[]).length?`<div class="sub">Buffs: ${s.buffs.map(b=>`${esc(b.effect)} ${fmt(b.amount)}${b.unit==='percent'?'%':''} · ${esc(b.category)} · ${(b.tags||[]).map(esc).join(', ')}`).join(' | ')}</div>`:''}${s.autoUse?.enabled&&s.autoUse?.exclusive?'<div class="sub" style="margin-top:8px;color:#0f766e;font-weight:600">AUTO ONLY · Manual casting disabled</div>':`<button class="skillbtn" ${cd>0||need?'disabled':''} onclick="chooseSkill(${i},\'${s.uid}\')">Use Skill</button>`}</div>`;
+ }).join('')||'<p class="sub">No skills created for this character.</p>';
+ modal(`<h2>${esc(c.name)}</h2>
+ <div class="tabs" style="margin-bottom:12px"><button class="active" onclick="showCombatCharacterTab('skills',this)">Choose Skill (${skillSet.length})</button><button onclick="showCombatCharacterTab('details',this)">Character Details</button></div>
+ <div id="combatSkillsPanel"><div class="item" style="margin-bottom:10px"><b>${esc(currentState?.name||'Current Active Skill Set')}</b><div class="sub">Only the currently active skill set is shown here.</div></div><div class="list">${skillCards}</div></div>
+ <div id="combatDetailsPanel" class="hidden">
+ <div class="item" style="margin-bottom:10px"><div class="between"><b>${esc(c.id||'No ID')}</b></div><div class="sub">Faction Tags: ${esc(tagSummary(c.faction,'No faction'))}</div><div class="sub">Element Tags: ${esc(tagSummary(c.element,'No element'))}</div><div class="sub">Main Energy: ${esc(c.resources.find(r=>r.uid===c.mainEnergy)?.name||'Not set')}</div></div>
+ <h3>Character Stats</h3><div class="grid tight">${profileStats}</div><div class="sub" style="margin:6px 0 10px">Battle damage dealt: <b>${fmt(c.damage||0)}</b></div>
+ <h3>Resources</h3><div class="item">${c.resources.map(r=>`<div class="between"><span>${esc(r.name)}</span><b>${fmt(r.current)}${r.max===null?'':' / '+fmt(r.max)}</b></div>`).join('')||'<span class="sub">No resources.</span>'}</div>
+ <h3>Passive Rules</h3><div class="list">${passives}</div><h3>Enhanced States</h3><div class="list">${(c.states||[]).map(st=>`<div class="item"><div class="between"><b>${esc(st.name)}</b><span class="tag">${st.active?'ACTIVE':'Inactive'}</span></div><div class="sub">Activation: ${esc(st.method)} · Duration: ${st.duration>0?fmt(st.duration)+'s':'Until deactivated'}</div>${st.active&&st.duration>0?`<div class="sub">${fmt(st.remaining)}s remaining</div>`:''}${!st.active&&['manual','consume'].includes(st.method)?`<button class="secondary small" onclick="manualState(${i},'${st.uid}')">Activate State</button>`:''}</div>`).join('')||'<div class="sub">No enhanced states configured.</div>'}</div>
+ <h3>Active Buffs</h3><div class="item">${buffs}</div></div>
+ <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="secondary" onclick="closeModal()">Close</button></div>`);
+}
+function chooseSkill(ci,sid){let c=battle.chars[ci],s=availableSkills(c).find(x=>x.uid===sid);if(s?.autoUse?.enabled&&s.autoUse?.exclusive)return toast('This is an Auto Skill Exclusive ability. It can only be triggered automatically.');if((c.cooldowns[sid]||0)>0)return toast('Skill is on cooldown.');for(let ef of s.effects){let r=c.resources.find(x=>x.uid===ef.resource);if(ef.action==='Consume'&&(!r||r.current<(ef.consumeMode==='all'?safeNumber(ef.minStacks,0):safeNumber(ef.amount))))return toast('Not enough '+(r?.name||'resource')+'.')}let active=battle.enemies.filter(e=>!e.dead);if(!active.length)return;closeModal();if(s.target==='Single'){pendingAction={ci,sid};modal(`<h2>Select target</h2><div class="list">${active.map(e=>`<button class="secondary" style="text-align:left" onclick="executeSkill(${ci},'${sid}','${e.instance}')">${esc(e.name)} · ${esc(e.id)} · HP ${fmt(e.currentHp)}</button>`).join('')}</div><button class="secondary" style="margin-top:12px" onclick="closeModal()">Cancel</button>`)}else executeSkill(ci,sid,null)}
+
+function activeState(c){return (c.states||[]).filter(st=>st.active).sort((a,b)=>safeNumber(a.activationOrder)-safeNumber(b.activationOrder))}
+function availableSkills(c){let active=activeState(c);let chosen=active.length?active[active.length-1]:null;return chosen?(chosen.skills||[]):c.skills}function effectiveSkill(c,base){return {...base}}
+function activateState(c,st,manual=false){if(st.active)return false;if(st.method==='threshold'&&!manual){let r=c.resources.find(x=>x.uid===st.resource);if(!r||r.current<st.activateAt)return false;}if(st.method==='consume'){let r=c.resources.find(x=>x.uid===st.resource);if(!r||r.current<st.cost){if(manual)toast('Not enough resource to activate '+st.name+'.');return false;}r.current=Math.max(0,r.current-st.cost);checkStateResources(c);}st.active=true;st.activationOrder=++battle.stateActivationCounter;st.remaining=Math.max(0,safeNumber(st.duration));log(`${c.name} entered ${st.name}.`);return true}
+function deactivateState(c,st,reason='ended'){if(!st.active)return;st.active=false;st.remaining=0;log(`${c.name}'s ${st.name} ${reason}.`)}
+function checkStateResources(c){for(let st of (c.states||[])){if(st.method!=='threshold')continue;let r=c.resources.find(x=>x.uid===st.resource);if(!r)continue;if(!st.active&&r.current>=st.activateAt)activateState(c,st);else if(st.active&&r.current<=st.deactivateAt)deactivateState(c,st,'deactivated at its resource threshold');}}
+function triggerSkillStates(c,skill){let activated=[];for(let st of (c.states||[]))if(st.method==='skill'&&st.triggerSkill===skill.uid&&!st.active&&activateState(c,st))activated.push(st);return activated;}
+function manualState(ci,uid0){if(!battle||battle.finishing||battle.ended)return;let c=battle?.chars[ci],st=c?.states?.find(x=>x.uid===uid0);if(!st||st.active)return;if(!['manual','consume'].includes(st.method))return toast('This state activates automatically.');activateState(c,st,true);triggerAutoSkills(c,{uid:'__resource_check__',tags:[]},null);renderCombat();}
+
+function effectiveStats(c,skill){let st={...liveStats(c),defIgnore:0};for(let b of c.buffs){if(!skill||!b.tags||!b.tags.some(t=>skill.tags.includes(t)))continue;let key=({ATK:'atk','Max HP':'maxHp',DEF:'def','Crit Rate':'critRate','Crit DMG':'critDmg','Power Mastery':'mastery','DEF Ignore':'defIgnore'})[b.effect];if(key)st[key]+=safeNumber(b.value,b.amount)}return st}
+function grantResource(recipient,resource,amount){
+ if(!recipient||!resource)return 0;
+ let gain=Math.max(0,safeNumber(amount));
+ if(resource.uid===recipient.mainEnergy)gain*=safeNumber(liveStats(recipient).energyRegen,100)/100;
+ let before=safeNumber(resource.current),next=resource.max===null?before+gain:Math.min(resource.max,before+gain);
+ resource.current=next;checkStateResources(recipient);return next-before;
+}
+function triggerPassives(actor,skill){
+ let usedTags=skill.tags||[];
+ for(let owner of battle.chars){
+  for(let rule of (owner.passives||[])){
+   if(rule.scope!=='all'&&owner.uid===actor.uid)continue;
+   let required=rule.tags||[];
+   if(!required.length)continue;
+   let matches=rule.mode==='all'?required.every(t=>usedTags.includes(t)):required.some(t=>usedTags.includes(t));
+   if(!matches)continue;
+   let resource=owner.resources.find(r=>r.uid===rule.resource);
+   if(!resource)continue;
+   let gained=grantResource(owner,resource,rule.amount);
+   if(gained>0)log(`${owner.name}'s passive ${rule.name||'Passive'} activated: +${fmt(gained)} ${resource.name}.`);
+  }
+ }
+}
+function showAutoSkillIndicator(skillName){
+ let node=document.createElement('div');
+ node.className='auto-skill-indicator';
+ node.textContent=`AUTO: ${skillName}`;
+ document.body.appendChild(node);
+ setTimeout(()=>node.remove(),1950);
+}
+function autoRuntime(owner,skill,cfg){
+ let key=owner.uid+'::'+skill.uid;
+ let st=battle.autoUseState[key];
+ if(!st)st=battle.autoUseState[key]={uses:0,charges:Math.max(1,Math.floor(safeNumber(cfg.maxCharges,3))),timestamps:[],resourceArmed:true,nextTime:cfg.timeAtStart?0:Math.max(.1,safeNumber(cfg.timeInterval,10))};
+ return st;
+}
+function autoLimitReady(owner,skill,cfg){
+ let st=autoRuntime(owner,skill,cfg),type=cfg.limitType||'none';
+ if(type==='window'){
+  let window=Math.max(.1,safeNumber(cfg.windowSeconds,10));
+  st.timestamps=st.timestamps.filter(t=>battle.time-t<window+1e-8);
+  return st.timestamps.length<Math.max(1,Math.floor(safeNumber(cfg.maxTriggers,3)));
+ }
+ if(type==='reset')return st.uses<Math.max(1,Math.floor(safeNumber(cfg.maxTriggers,3)));
+ if(type==='charges')return st.charges>0;
+ return true;
+}
+function spendAutoLimit(owner,skill,cfg){
+ let st=autoRuntime(owner,skill,cfg),type=cfg.limitType||'none';
+ if(type==='window')st.timestamps.push(battle.time);
+ else if(type==='reset')st.uses++;
+ else if(type==='charges')st.charges=Math.max(0,st.charges-1);
+}
+function resetAutoLimitsForSkill(usedSkill){
+ if(!usedSkill)return;
+ for(let owner of battle.chars){
+  let allSkills=[...(owner.skills||[]),...(owner.states||[]).flatMap(st=>st.skills||[])];
+  for(let skill of allSkills){
+   let cfg=skill.autoUse||{},type=cfg.limitType||'none';
+   if(!cfg.enabled||!cfg.resetSkill||cfg.resetSkill!==usedSkill.uid)continue;
+   let st=autoRuntime(owner,skill,cfg);
+   if(type==='reset')st.uses=0;
+   if(type==='charges')st.charges=Math.max(1,Math.floor(safeNumber(cfg.maxCharges,3)));
+  }
+ }
+}
+function tryAutoCast(owner,skill,triggerActor,targetId){
+ let cfg=skill.autoUse||{};
+ if(!cfg.enabled||!autoLimitReady(owner,skill,cfg))return false;
+ let ci=battle.chars.indexOf(owner);
+ let target=battle.enemies.find(e=>e.instance===targetId&&!e.dead)?.instance||battle.enemies.find(e=>!e.dead)?.instance||null;
+ if(!target)return false;
+ let ok=executeSkillNow(ci,skill.uid,target,{}, {automatic:true,triggerActorUid:triggerActor?.uid||null});
+ if(ok)spendAutoLimit(owner,skill,cfg);
+ return !!ok;
+}
+function initializeTimeAutoSkills(){if(!battle)return;for(let owner of battle.chars)for(let skill of availableSkills(owner)){let cfg=skill.autoUse||{};if(cfg.enabled&&cfg.trigger==='time'){let st=autoRuntime(owner,skill,cfg);st.nextTime=Math.max(.1,safeNumber(cfg.timeInterval,10));if(cfg.timeAtStart&&tryAutoCast(owner,skill,null,null)){showAutoSkillIndicator(skill.name);log(`${owner.name}'s ${skill.name} triggered automatically.`);}}}}
+function processTimeAutoSkills(){if(!battle||battle.finishing||battle.ended)return;for(let owner of battle.chars)for(let skill of availableSkills(owner)){let cfg=skill.autoUse||{};if(!cfg.enabled||cfg.trigger!=='time')continue;let st=autoRuntime(owner,skill,cfg);if(battle.time+1e-8<safeNumber(st.nextTime,Math.max(.1,safeNumber(cfg.timeInterval,10))))continue;let interval=Math.max(.1,safeNumber(cfg.timeInterval,10));st.nextTime+=interval;if(tryAutoCast(owner,skill,null,null)){showAutoSkillIndicator(skill.name);log(`${owner.name}'s ${skill.name} triggered automatically.`);}}}
+function triggerAutoSkills(actor,usedSkill,targetId){
+ if(!battle||battle.finishing||battle.ended)return;
+ resetAutoLimitsForSkill(usedSkill);
+ let queue=[];
+ for(let owner of battle.chars){
+  for(let skill of availableSkills(owner)){
+   let cfg=skill.autoUse||{};
+   if(!cfg.enabled)continue;
+   let should=false;
+   if(cfg.trigger==='skill')should=!!cfg.triggerSkill&&cfg.triggerSkill===usedSkill.uid&&!(owner.uid===actor.uid&&skill.uid===usedSkill.uid);
+   else if(cfg.trigger==='allyTag'&&owner.uid!==actor.uid){
+    let required=cfg.tags||[],used=usedSkill.tags||[];
+    should=required.length>0&&(cfg.tagMode==='all'?required.every(t=>used.includes(t)):required.some(t=>used.includes(t)));
+   }else if(cfg.trigger==='resource'){
+    if(owner.uid===actor.uid&&skill.uid===usedSkill.uid)continue;
+    let resource=owner.resources.find(r=>r.uid===cfg.resource);
+    let state=autoRuntime(owner,skill,cfg);
+    if(resource&&resource.current<safeNumber(cfg.threshold,1))state.resourceArmed=true;
+    if(resource&&resource.current>=safeNumber(cfg.threshold,1)&&state.resourceArmed)should=true;
+   }
+   if(should&&autoLimitReady(owner,skill,cfg))queue.push({owner,skill});
+  }
+ }
+ for(let item of queue){
+  if(battle.finishing||battle.ended)break;
+  let success=tryAutoCast(item.owner,item.skill,actor,targetId);
+  if(success){
+   let cfg=item.skill.autoUse||{};
+   if(cfg.trigger==='resource')autoRuntime(item.owner,item.skill,cfg).resourceArmed=false;
+   showAutoSkillIndicator(item.skill.name);
+   log(`${item.owner.name}'s ${item.skill.name} triggered automatically.`);
+  }
+ }
+}
+let skillActionQueued=false;
+function executeSkill(ci,sid,targetId,selectedRecipients={}){
+ if(!battle||battle.ended||battle.finishing||skillActionQueued)return;
+ skillActionQueued=true;
+ setTimeout(()=>{skillActionQueued=false;executeSkillNow(ci,sid,targetId,selectedRecipients)},500);
+}
+function executeSkillNow(ci,sid,targetId,selectedRecipients={},options={}) {
+ let automatic=!!options.automatic;
+ if(!battle||battle.ended||(!automatic&&battle.finishing))return false;
+ if(!automatic)closeModal();
+ let c=battle.chars[ci],s=availableSkills(c).find(x=>x.uid===sid);
+ if(!c||!s)return false;
+ if(!automatic&&s.autoUse?.enabled&&s.autoUse?.exclusive){toast('This is an Auto Skill Exclusive ability. It can only be triggered automatically.');return false;}
+ if((c.cooldowns[sid]||0)>0)return false;
+ let targets=battle.enemies.filter(e=>!e.dead);
+ if(s.target==='Single'){
+  targets=targets.filter(e=>e.instance===targetId);
+  if(automatic&&!targets.length)targets=battle.enemies.filter(e=>!e.dead).slice(0,1);
+ }
+ if(!targets.length)return false;
+ let resourceSnapshot=Object.fromEntries(c.resources.map(r=>[r.uid,safeNumber(r.current)]));
+ for(let ef of s.effects){let r=c.resources.find(x=>x.uid===ef.resource),required=ef.consumeMode==='all'?safeNumber(ef.minStacks,0):safeNumber(ef.amount);if(ef.action==='Consume'&&(!r||r.current<required)){if(!automatic)toast('Not enough '+(r?.name||'resource')+'.');return false;}}
+ for(let b of s.buffs.filter(x=>x.category==='Selected Character')){
+  let others=battle.chars.filter(x=>x!==c);
+  if(!others.length)continue;
+  if(!selectedRecipients[b.uid]&&automatic){
+   let preferred=others.find(x=>x.uid===options.triggerActorUid)||others[0];
+   selectedRecipients[b.uid]=preferred.uid;
+  }
+  if(!selectedRecipients[b.uid]&&others.length===1)selectedRecipients[b.uid]=others[0].uid;
+  if(!selectedRecipients[b.uid]&&others.length>1){
+   modal(`<h2>Select buff recipient</h2>${others.map(x=>`<button class="secondary" style="display:block;width:100%;margin:6px 0" onclick="executeSkill(${ci},'${sid}','${targetId||''}',{...${JSON.stringify(selectedRecipients)},'${b.uid}':'${x.uid}'})">${esc(x.name)}</button>`).join('')}<button class="secondary" onclick="closeModal()">Cancel</button>`);
+   return false;
+  }
+ }
+ for(let ef of s.effects){let r=c.resources.find(x=>x.uid===ef.resource);if(!r)continue;if(ef.action==='Consume'){let amount=ef.consumeMode==='all'?Math.max(0,Math.min(safeNumber(r.current),ef.maxStacks==null?Infinity:safeNumber(ef.maxStacks))):safeNumber(ef.amount);r.current=Math.max(0,r.current-amount);}else grantResource(c,r,ef.amount);}
+ checkStateResources(c);
+ for(let b of s.buffs){
+  if(b.category==='Self')applyBuff(c,b,c,s);
+  else if(b.category==='Teamwide')battle.chars.forEach(r=>applyBuff(r,b,c,s));
+  else {let r=battle.chars.find(x=>x.uid===selectedRecipients[b.uid]);if(r)applyBuff(r,b,c,s);}
+ }
+ triggerPassives(c,s);battle.chars.forEach(checkStateResources);
+ let st=effectiveStats(c,s),scaleValue=s.scale==='resource'?safeNumber(resourceSnapshot[s.scaleResource],0):safeNumber(st[s.scale],0),base;if(s.scale==='resource'&&(s.resourceScaleMode||'multiplier')==='multiplier'){let baseStat=s.resourceBaseStat||'atk';base=safeNumber(st[baseStat],0)*scaleValue*safeNumber(s.mult,0)/100;}else{base=scaleValue*safeNumber(s.mult,100)/100;}
+ base*=1+mindTagBonus(c,s.tags)/100;
+ let critRate=s.canCrit===false?0:st.critRate;
+ let hits=[];
+ if(s.target==='Multi')hits=targets;
+ else if(s.target==='Bounce'){for(let h=0;h<s.hits;h++)hits.push(targets[Math.floor(Math.random()*targets.length)]);}
+ else hits=[targets[0]];
+ if(s.type==='DoT'){
+  let tickCount=Math.floor((s.duration+1e-8)/s.interval);
+  for(let e of hits){if(tickCount>0)c.dots.push({owner:c.uid,ownerIndex:ci,skill:s.name,skillName:s.name,skillId:s.uid,skillTags:[...(s.tags||[])],base,critRate,critDmg:st.critDmg,defIgnore:s.defIgnore+st.defIgnore,stun:s.stun,remaining:tickCount,interval:s.interval,next:s.interval,target:e.instance});log(`${c.name} applied ${s.name} to ${e.name} (${tickCount} ticks).`);}
+ }else{
+  battle.activeDamageBatch=createDamageBatch(s.target==='Bounce'?'bounce':'direct',ci,s.name);
+  for(let e of hits)dealDamage(ci,s,e,base,critRate,st.critDmg,s.defIgnore+st.defIgnore,s.stun);
+  if(battle.activeDamageBatch.events.length)battle.floatEvents.push(battle.activeDamageBatch);
+  battle.activeDamageBatch=null;
+ }
+ let cast=automatic?0:s.cast;
+ c.cast+=cast;
+ delete c.cooldowns[sid];
+ log(`${c.name} ${automatic?'automatically used':'used'} ${s.name} (cast ${cast}s).`);
+ let newlyActivatedStates=triggerSkillStates(c,s);
+ newlyActivatedStates.forEach(state=>{if(state.duration>0)state.remaining+=cast;});
+ checkStateResources(c);
+ advance(cast,true);
+ if(!battle.ended)c.cooldowns[sid]=s.cooldown;
+ if(!automatic&&!battle.finishing)triggerAutoSkills(c,s,targetId);
+ if(battle.enemies.every(e=>e.dead))markBattleFinished('All enemies defeated.');
+ else if(battle.limit!==null&&battle.time>=battle.limit-1e-8)markBattleFinished('Time limit reached.');
+ renderCombat(false);
+ if(!automatic)showSkillUsedPopup(s.name);
+ return true;
+}
+function applyBuff(recipient,b,source,skill){if(!b.tags.length)return;let isMind=String(b.effect||'').startsWith('MindTag|'),parts=isMind?b.effect.split('|'):[],statKey=({'ATK':'atk','Max HP':'maxHp','DEF':'def','Crit Rate':'critRate','Crit DMG':'critDmg','Power Mastery':'mastery'})[b.effect];let base=0;if(statKey){let totals=relicStatTotals(recipient.uid),raw=safeNumber(recipient.stats[statKey]),basis=raw+safeNumber(totals.mainFlat[statKey]);base=basis+basis*safeNumber(totals.percent[statKey])/100;for(let state of activeState(recipient))base+=safeNumber(state.statMods?.[statKey]);}let snapValue=(b.effect==='DEF Ignore'||b.effect==='Pure Buff'||isMind)?b.amount:(statKey&&b.unit==='percent'?base*b.amount/100:b.amount);let app={uid:uid(),source:source.uid,skill:skill.uid,effect:b.effect,amount:b.amount,value:snapValue,unit:(b.effect==='Pure Buff'||isMind)?'percent':'flat',mindTagType:isMind?parts[1]:null,mindTag:isMind?parts.slice(2).join('|'):null,tags:[...b.tags],duration:b.duration,left:b.duration,stack:b.stack};let same=recipient.buffs.filter(x=>x.source===source.uid&&x.skill===skill.uid&&x.effect===b.effect);if(b.stack==='Refresh'&&same.length){same.forEach(x=>{x.left=b.duration;x.value=snapValue})}else recipient.buffs.push(app);if(b.effect==='Main Energy'){let r=recipient.resources.find(x=>x.uid===recipient.mainEnergy);if(r)grantResource(recipient,r,b.amount);}}
+function safeNumber(v,fallback=0){let n=Number(v);return Number.isFinite(n)?n:fallback}
+function effectivePureBuff(c,tags){return (c.buffs||[]).filter(b=>{if(b.effect==='Pure Buff')return !b.tags?.length||b.tags.some(t=>(tags||[]).includes(t));if(!String(b.effect||'').startsWith('MindTag|'))return false;let type=b.mindTagType,tag=b.mindTag;return type==='skill'?(tags||[]).includes(tag):type==='faction'?(c.faction||[]).includes(tag):type==='element'?(c.element||[]).includes(tag):false}).reduce((sum,b)=>sum+safeNumber(b.value,b.amount),0)}
+function showSkillUsedPopup(skillName){
+ let overlay=document.createElement('div');overlay.className='skill-used-overlay';
+ overlay.innerHTML=`<div class="skill-used-card"><div class="skill-used-label">USED</div><div class="skill-used-name">${esc(skillName)}</div></div>`;
+ document.body.appendChild(overlay);
+ setTimeout(()=>{overlay.remove();showDamagePopups()},1500);
+}
+function createDamageBatch(source,ci,skillName,time=battle?.time||0){
+ return {id:'damage-'+(++battle.damageBatchCounter),source,ci,skillName,time,events:[]};
+}
+function recordDamageFloat(ci,target,amount,crit,source,skillName){
+ if(!battle)return;
+ let batch=battle.activeDamageBatch;
+ if(!batch){
+  let timeKey=Number(battle.time||0).toFixed(5);
+  let id=`dot-${timeKey}`;
+  batch=battle.floatEvents.find(x=>x.id===id);
+  if(!batch){batch={id,source:'dot',ci,skillName,time:battle.time,events:[]};battle.floatEvents.push(batch);}
+ }
+ batch.events.push({ci,target,amount,crit,skillName});
+}
+function showDamagePopups(){
+ if(!battle||!battle.floatEvents?.length)return;
+ let batches=battle.floatEvents.splice(0),cursor=0;
+ for(let batch of batches){
+  let byTarget=new Map();
+  for(let ev of batch.events){if(!byTarget.has(ev.target))byTarget.set(ev.target,[]);byTarget.get(ev.target).push(ev);}
+  let batchEnd=0;
+  for(let [target,events] of byTarget){
+   let stagger=(batch.source==='dot'||batch.source==='bounce');
+   let interval=stagger&&events.length>1?3/events.length:0;
+   events.forEach((ev,index)=>{
+    let offset=index*interval;
+    batchEnd=Math.max(batchEnd,offset+1);
+    setTimeout(()=>{
+     let card=[...document.querySelectorAll('[data-enemy-instance]')].find(x=>x.dataset.enemyInstance===target);
+     if(!card)return;
+     let node=document.createElement('div');
+     node.className='damage-float'+(ev.crit?' critical':'');
+     node.style.animationDuration='1s';
+     node.style.left=(38+Math.random()*24)+'%';
+     node.style.top=(27+Math.random()*30)+'%';
+     node.innerHTML=`${ev.crit?'<span class="crit-word">CRITICAL!</span>':''}${fmt(ev.amount)}`;
+     card.appendChild(node);
+     setTimeout(()=>node.remove(),1050);
+    },(cursor+offset)*1000);
+   });
+  }
+  let totals={};
+  for(let ev of batch.events)totals[ev.ci]=(totals[ev.ci]||0)+safeNumber(ev.amount);
+  let showAt=cursor+batchEnd;
+  setTimeout(()=>{
+   for(let [ci,total] of Object.entries(totals)){
+    let card=[...document.querySelectorAll('.party-card')][Number(ci)];
+    if(!card)continue;
+    let node=document.createElement('div');node.className='damage-total-float';node.textContent=`TOTAL DAMAGE  ${fmt(total)}`;
+    card.appendChild(node);setTimeout(()=>node.remove(),1550);
+   }
+  },showAt*1000);
+  cursor+=batchEnd+.15;
+ }
+}
+function dealDamage(ci,s,e,base,cr,cd,di,stun){
+ if(e.dead)return;
+ let safeBase=Math.max(0,safeNumber(base)),critRate=Math.max(0,Math.min(100,safeNumber(cr))),critDmg=safeNumber(cd);
+ let defValue=safeNumber(e.stunned?safeNumber(e.stunnedDef,e.def):e.def)-safeNumber(di);
+ let stunValue=Math.max(0,safeNumber(stun));
+ let crit=Math.random()*100<critRate;
+ let raw=safeBase*(crit?1+critDmg/100:1);
+ let afterDefense=Math.max(0,raw*(1-defValue/100));let dealt=afterDefense*(1+effectivePureBuff(battle.chars[ci],s.tags)/100);
+ let currentHp=Math.max(0,safeNumber(e.currentHp,e.hp));
+ let actual=Math.max(0,Number.isFinite(dealt)?dealt:0);
+ e.currentHp=Math.max(0,currentHp-Math.min(currentHp,actual));
+ if(e.currentHp<=0){e.dead=true;awardEnemyEssence(e);}
+ e.currentStun=Math.max(0,safeNumber(e.currentStun,e.stun)-stunValue);
+ if(e.currentStun<=0&&!e.stunned&&!e.dead){e.stunned=true;e.stunLeft=Math.max(0,safeNumber(e.stunDuration));log(`${e.name} is stunned!`)}
+ let c=battle.chars[ci];
+ c.damage+=actual;
+ c.skillDamage[s.uid]=(c.skillDamage[s.uid]||0)+actual;
+ recordDamageFloat(ci,e.instance,actual,crit,'direct',s.name);
+ if(actual>0)log(`${c.name} → ${e.name}: ${fmt(actual)}${crit?' CRIT':''} damage${s.type==='DoT'?' (DoT)':''}.`);
+}
+function advance(dt,deferTimeLimit=false){if(dt<=0||!battle||battle.ended)return;let end=battle.time+dt;while(battle.time<end-1e-8){let step=end-battle.time;for(let c of battle.chars){for(let st of (c.states||[]))if(st.active&&st.duration>0)step=Math.min(step,Math.max(0,st.remaining));for(let d of c.dots)if(d.remaining>0)step=Math.min(step,Math.max(0,d.next));for(let b of c.buffs)step=Math.min(step,Math.max(0,b.left))}for(let e of battle.enemies)if(e.stunned)step=Math.min(step,Math.max(0,e.stunLeft));for(let owner of battle.chars)for(let sk of availableSkills(owner)){let cfg=sk.autoUse||{};if(cfg.enabled&&cfg.trigger==='time'){let rt=autoRuntime(owner,sk,cfg);if(rt.nextTime>battle.time+1e-8)step=Math.min(step,rt.nextTime-battle.time);}}if(!deferTimeLimit&&battle.limit!==null)step=Math.min(step,Math.max(0,battle.limit-battle.time));if(step<1e-8)step=Math.min(end-battle.time,1e-7);battle.time+=step;
+for(let c of battle.chars){for(let st of (c.states||[]))if(st.active&&st.duration>0){st.remaining-=step;if(st.remaining<=1e-8)deactivateState(c,st,'expired');}for(let k in c.cooldowns)c.cooldowns[k]=Math.max(0,c.cooldowns[k]-step);c.buffs.forEach(b=>b.left-=step);c.buffs=c.buffs.filter(b=>b.left>1e-8);for(let d of c.dots){d.next-=step;if(d.remaining>0&&d.next<=1e-8){let e=battle.enemies.find(x=>x.instance===d.target);if(e&&!e.dead){let crit=Math.random()*100<Math.max(0,Math.min(100,d.critRate));let raw=safeNumber(d.base)*(crit?1+safeNumber(d.critDmg)/100:1);let def=safeNumber(e.stunned?e.stunnedDef:e.def)-safeNumber(d.defIgnore);let amount=Math.max(0,raw*(1-def/100))*(1+effectivePureBuff(c,d.skillTags||[])/100);let currentHp=Math.max(0,safeNumber(e.currentHp,e.hp));let actual=Math.max(0,Number.isFinite(amount)?amount:0);e.currentHp=Math.max(0,currentHp-Math.min(currentHp,actual));if(e.currentHp<=0){e.dead=true;awardEnemyEssence(e);}e.currentStun=Math.max(0,safeNumber(e.currentStun,e.stun)-safeNumber(d.stun));if(e.currentStun<=0&&!e.stunned&&!e.dead){e.stunned=true;e.stunLeft=safeNumber(e.stunDuration)}c.damage+=actual;recordDamageFloat(battle.chars.indexOf(c),e.instance,actual,crit,'dot',d.skillName||d.skill);d.remaining--;d.next=d.interval;c.skillDamage[d.skillId]=(c.skillDamage[d.skillId]||0)+actual;if(actual>0)log(`${c.name} → ${e.name}: ${fmt(actual)} DoT${crit?' CRIT':''}.`) }else{d.remaining=0}}}c.dots=c.dots.filter(d=>d.remaining>0)}for(let e of battle.enemies){if(e.stunned){e.stunLeft-=step;if(e.stunLeft<=1e-8){e.stunned=false;e.currentStun=e.stun;e.stunLeft=0;log(`${e.name} recovered from stun.`)}}}}
+processTimeAutoSkills();if(battle.enemies.every(e=>e.dead))markBattleFinished('All enemies defeated.');if(!deferTimeLimit&&!battle.finishing&&battle.limit!==null&&battle.time>=battle.limit-1e-8){markBattleFinished('Time limit reached.');return}}
+function markBattleFinished(reason){if(!battle||battle.ended)return;battle.finishing=true;battle.finishReason=battle.finishReason||reason;let btn=document.getElementById('finishBattleBtn');if(btn)btn.classList.remove('hidden');}
+function endConfirm(){confirmBox('End this battle and view the results?',()=>finishBattle('Session ended manually.'))}
+function finishBattle(reason){if(!battle||battle.ended)return;battle.ended=true;let total=battle.chars.reduce((a,c)=>a+c.damage,0),cast=battle.chars.reduce((a,c)=>a+c.cast,0),max=Math.max(0,...battle.chars.map(c=>c.damage)),mvps=battle.chars.filter(c=>c.damage===max&&max>0);let dps=x=>x.cast>0?fmt(x.damage/x.cast):x.damage===0?'0':'N/A';document.getElementById('combat').classList.add('hidden');let el=document.getElementById('results');el.classList.remove('hidden');el.innerHTML=`<div class="panel"><h2>Battle Results</h2><p class="sub">${esc(reason)} · Combat time ${battle.time.toFixed(2)}s</p><div class="notice"><b>MVP${mvps.length>1?'s':''}:</b> ${mvps.length?mvps.map(c=>`${esc(c.name)} (${fmt(c.damage)} damage)`).join(', '):'No damage dealt'}</div><div class="grid" style="margin-top:12px"><div class="item"><div class="sub">Team Total Damage</div><h2>${fmt(total)}</h2></div><div class="item"><div class="sub">Total Enemy HP</div><h2>${fmt(battle.totalEnemyHp||0)}</h2></div><div class="item"><div class="sub">Total Enemy HP Damage</div><h2>${fmt((battle.totalEnemyHp>0?total/battle.totalEnemyHp*100:0))}%</h2></div><div class="item"><div class="sub">Team DPS</div><h2>${cast>0?fmt(total/cast):total===0?'0':'N/A'}</h2></div><div class="item"><div class="sub">Team Cast Time</div><h2>${cast.toFixed(2)}s</h2></div></div></div><div class="panel"><h3>Individual Performance</h3><div class="list">${battle.chars.map(c=>`<div class="item result"><div class="between"><b>${esc(c.name)} · ${esc(c.id)}</b><span class="tag">${c.damage===max&&max>0?'MVP':''}</span></div><div class="grid tight"><div class="stat">Damage<br><b>${fmt(c.damage)}</b></div><div class="stat">DPS<br><b>${dps(c)}</b></div><div class="stat">Cast time<br><b>${c.cast.toFixed(2)}s</b></div></div><div class="sub">Skill damage: ${Object.entries(c.skillDamage).map(([id,v])=>{let s=[...c.skills,...(c.states||[]).flatMap(st=>st.skills||[])].find(x=>x.uid===id);return `${esc(s?.name||'Skill')}: ${fmt(v)}`}).join(' · ')||'None'}</div></div>`).join('')}</div></div><div class="row"><button onclick="leaveResults()">Main Menu</button><button class="secondary" onclick="newBattle()">Start Another Battle</button></div>`}
+function leaveResults(){battle=null;document.getElementById('results').classList.add('hidden');document.getElementById('setup').classList.remove('hidden');showPage('create')}
+function newBattle(){battle=null;document.getElementById('results').classList.add('hidden');document.getElementById('setup').classList.remove('hidden');renderSetup()}
+function renderOthers(){
+ let input=document.getElementById('essenceAmountInput'),current=document.getElementById('essenceAmountCurrent');
+ if(input)input.value=db.relicEssence;if(current)current.textContent=`Current Relic Essence: ${db.relicEssence}`;
+ let discardedInput=document.getElementById('discardedEssenceAmountInput'),discardedCurrent=document.getElementById('discardedEssenceAmountCurrent');
+ if(discardedInput)discardedInput.value=db.discardedEssence||0;if(discardedCurrent)discardedCurrent.textContent=`Current Discarded Essence: ${db.discardedEssence||0}`;
+ let eligible=document.getElementById('eligibleRelicsCurrent');if(eligible)eligible.textContent=`Eligible relics: ${(db.relics||[]).filter(r=>!relicIsEquipped(r.uid)&&!r.favorite).length}`;
+}
+function setEssenceAmount(){let input=document.getElementById('essenceAmountInput'),value=Number(input?.value);if(!Number.isFinite(value)||value<0||!Number.isInteger(value))return toast('Enter a whole number of 0 or higher.');db.relicEssence=value;save();renderOthers();renderRelicInventory();let label=document.getElementById('combatEssence');if(label)label.textContent=`Relic Essence: ${db.relicEssence}`;toast(`Relic Essence set to ${db.relicEssence}.`);}
+function setDiscardedEssenceAmount(){
+ let input=document.getElementById('discardedEssenceAmountInput'),value=Number(input?.value);
+ if(!Number.isFinite(value)||value<0||!Number.isInteger(value))return toast('Enter a whole number of 0 or higher.');
+ db.discardedEssence=value;save();renderOthers();renderRelicInventory();
+ let label=document.getElementById('rewardDiscardedEssence');if(label)label.textContent=db.discardedEssence;
+ toast(`Discarded Essence set to ${db.discardedEssence}.`);
+}
+function confirmQuickDeleteRelics(){
+ let eligible=(db.relics||[]).filter(r=>!relicIsEquipped(r.uid)&&!r.favorite);
+ if(!eligible.length)return toast('There are no unequipped, unfavourited relics to delete.');
+ confirmBox(`You are about to delete ${eligible.length} unequipped and unfavourited relic(s). Continue to the final confirmation?`,()=>{
+  confirmBox(`FINAL CONFIRMATION: Permanently delete these ${eligible.length} relic(s)? Each deleted relic will give 1 Discarded Essence. This cannot be undone.`,()=>{
+   let ids=new Set(eligible.map(r=>r.uid)),count=0;
+   db.relics=db.relics.filter(r=>{if(ids.has(r.uid)&&!relicIsEquipped(r.uid)&&!r.favorite){count++;return false;}return true;});
+   db.discardedEssence=(db.discardedEssence||0)+count;save();renderRelicInventory();renderRelicEquip();renderOthers();
+   toast(`Deleted ${count} relic(s). +${count} Discarded Essence.`);
+  });
+ });
+}
+function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='damage-calculator-data.json';a.click();URL.revokeObjectURL(a.href)}
+renderAll();
+</script></body></html>
